@@ -317,18 +317,12 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground flex-col md:flex-row relative">
-      {/* Decorative background blobs for glassmorphism effect */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-brand/20 blur-[120px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px]" />
-      </div>
-
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/30 liquid-glass md:flex h-screen sticky top-0 z-20">
+    <div className="flex min-h-screen bg-background text-foreground flex-col md:flex-row">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/60 bg-surface/40 md:flex h-screen sticky top-0">
         <SidebarContent role={role} signOut={signOut} />
       </aside>
       
-      <div className="md:hidden flex sticky top-0 z-40 liquid-glass border-b border-border/30 h-16 items-center px-4 justify-between">
+      <div className="md:hidden flex sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60 h-14 items-center px-4 justify-between">
         <div className="flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -337,7 +331,7 @@ export function DashboardShell({
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0 flex flex-col liquid-glass-heavy border-r-border/30">
+            <SheetContent side="left" className="w-72 p-0 flex flex-col bg-surface/95 backdrop-blur-xl">
               <SidebarContent role={role} signOut={signOut} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
@@ -350,7 +344,7 @@ export function DashboardShell({
         </div>
       </div>
 
-      <main className="flex-1 min-w-0 relative z-10 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 min-w-0">{children}</main>
     </div>
   );
 }
@@ -365,7 +359,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="border-b border-border/30 liquid-glass">
+    <div className="border-b border-border/60 bg-background/70 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-4 px-6 py-6">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-tight">{title}</h1>
@@ -395,7 +389,7 @@ export function StatCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl liquid-glass p-5 relative overflow-hidden transition-all duration-300 hover:shadow-glow hover:-translate-y-1">
+    <div className="rounded-xl border border-border/60 bg-card p-5 relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -424,7 +418,7 @@ export function EmptyState({
   icon?: ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-border/50 liquid-glass p-10 text-center transition-all duration-300 hover:border-brand/50">
+    <div className="rounded-xl border border-dashed border-border/60 bg-surface/30 p-10 text-center">
       <div className="mx-auto grid h-10 w-10 place-items-center rounded-lg border border-border/60 bg-surface-elevated">
         <Icon className="h-5 w-5 text-muted-foreground" />
       </div>
