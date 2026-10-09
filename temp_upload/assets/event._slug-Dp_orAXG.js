@@ -1,0 +1,1 @@
+import{j as e,B as s}from"./index-D1UdByr4.js";const r=({reset:t})=>e.jsx("div",{className:"grid min-h-screen place-items-center px-6 text-center",children:e.jsxs("div",{children:[e.jsx("h1",{className:"text-2xl font-semibold",children:"Couldn't load this event"}),e.jsx(s,{onClick:t,className:"mt-4",children:"Try again"})]})});export{r as errorComponent};
