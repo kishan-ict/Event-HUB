@@ -177,6 +177,7 @@ function HostSidebarNav({ onNavigate, isMobile }: { onNavigate?: () => void, isM
         return (
           <button
             key={item.label}
+            id={`sidebar-link-${item.key}`}
             type="button"
             onClick={() => onClick(item.key)}
             className={`flex items-center gap-2.5 rounded-full px-3 py-1.5 text-left text-sm font-medium transition-colors whitespace-nowrap ${

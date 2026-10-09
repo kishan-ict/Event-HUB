@@ -2,8 +2,10 @@ import { createFileRoute, Outlet, Link, useMatchRoute } from "@tanstack/react-ro
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 export const Route = createFileRoute("/_authenticated/dashboard/host/events/$id")({
   component: EventLayout,
@@ -28,6 +30,37 @@ function EventLayout() {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (isOverview && event) {
+      const tourKey = `host-sidebar-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#sidebar-link-overview', popover: { title: 'Event Overview', description: 'Your main dashboard for this event. View quick stats, publish status, and overall progress here.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-website', popover: { title: 'Website Builder', description: 'Design your public event landing page using our AI generator or custom code.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-form', popover: { title: 'Registration Form', description: 'Customize the questions attendees must answer when they register.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-registrations', popover: { title: 'Registrations', description: 'Manage approved and pending participants, send emails, and export data.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-judges', popover: { title: 'Judges & Criteria', description: 'Invite judges and define the scoring criteria for the submissions.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-attenders', popover: { title: 'Attendance Takers', description: 'Invite staff members to scan QR codes and mark attendees at the door.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-submissions', popover: { title: 'Submissions', description: 'View and manage all projects submitted by participants.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-announcements', popover: { title: 'Announcements', description: 'Broadcast live notifications to all participants via their portal or email.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-schedule', popover: { title: 'Schedule', description: 'Build your event timeline so participants know exactly what is happening and when.', side: "right", align: 'start' } },
+              { element: '#sidebar-link-analytics', popover: { title: 'Analytics', description: 'View deep insights, charts, and metrics about your event performance.', side: "right", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [isOverview, event, id]);
 
   if (!event) return <Outlet />;
 
