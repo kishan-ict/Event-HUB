@@ -11,6 +11,10 @@ import {
   EmptyState,
 } from "@/components/dashboard-shell";
 import { Calendar, Plus, Users, UserCheck, ShieldCheck, UsersRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 export const Route = createFileRoute("/_authenticated/dashboard/host")({
   head: () => ({ meta: [{ title: "Host dashboard — EVENT-HUB" }] }),
@@ -41,6 +45,7 @@ function HostDashboard() {
 
   return (
     <DashboardShell role="host">
+      {!isLoading && total === 0 && <HostOnboardingModal />}
       {isOverview ? (
         <>
           <PageHeader
@@ -125,7 +130,7 @@ function HostDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <Link to="/events/create">
-                      <Button>Create your first event</Button>
+                      <Button id="btn-create-first-event">Create your first event</Button>
                     </Link>
                     <Link to="/dashboard/host/guide">
                       <Button variant="outline">Read the Host Guide</Button>
@@ -204,3 +209,76 @@ function HostDashboard() {
   );
 }
 
+function HostOnboardingModal() {
+  const [show, setShow] = useState(false);
+  const [text, setText] = useState("");
+  const fullText = "Hi there! I am here to guide you through the process of creating your first event and making it public.";
+  
+  useEffect(() => {
+    const tourKey = "host-global-tour-seen";
+    if (!localStorage.getItem(tourKey)) {
+      setShow(true);
+      let i = 0;
+      const interval = setInterval(() => {
+        setText(fullText.substring(0, i));
+        i++;
+        if (i > fullText.length) clearInterval(interval);
+      }, 30);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  if (!show) return null;
+
+  const handleNoNeed = () => {
+    localStorage.setItem("host-global-tour-seen", "true");
+    setShow(false);
+    toast.success("No worries! Just remember to complete the 3 steps (Website, Schedule, Form) to make your event live.");
+  };
+
+  const handleLetsGo = () => {
+    localStorage.setItem("host-global-tour-seen", "true");
+    setShow(false);
+    
+    setTimeout(() => {
+      const driverObj = driver({
+        showProgress: false,
+        animate: true,
+        steps: [
+          { 
+            element: '#btn-create-first-event', 
+            popover: { 
+              title: 'Create Your First Event 🎉', 
+              description: 'Click this button to give your event a catchy name and start the setup process!', 
+              side: "bottom", 
+              align: 'center' 
+            } 
+          }
+        ]
+      });
+      driverObj.drive();
+    }, 100);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md">
+      <div className="max-w-3xl text-center space-y-8 p-6">
+        <h2 className="text-3xl md:text-5xl font-black text-white leading-tight min-h-[100px]">
+          {text}
+          <span className="animate-pulse ml-1 inline-block w-3 h-10 md:h-12 bg-brand align-middle"></span>
+        </h2>
+        
+        {text.length >= fullText.length && (
+          <div className="flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Button size="lg" variant="outline" className="text-white border-white/20 bg-black/40 hover:bg-white/10" onClick={handleNoNeed}>
+              No Need
+            </Button>
+            <Button size="lg" className="bg-brand text-brand-foreground hover:bg-brand/90 px-8 shadow-xl shadow-brand/20" onClick={handleLetsGo}>
+              Let's Go!
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
