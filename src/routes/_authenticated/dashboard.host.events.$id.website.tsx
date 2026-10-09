@@ -582,8 +582,8 @@ function WebsiteBuilder() {
     const originalFile = e.target.files?.[0];
     if (!originalFile) return;
     
-    if (type === "banner" && dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2) {
-      toast.error("Daily banner update limit reached (2/2). Try again tomorrow.");
+    if (type === "banner" && dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 5) {
+      toast.error("Daily banner update limit reached (5/5). Try again tomorrow.");
       if (e.target) e.target.value = '';
       return;
     }
@@ -748,20 +748,20 @@ function WebsiteBuilder() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  if (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2) {
-                    toast.error("Daily banner update limit reached (2/2). Try again tomorrow.");
+                  if (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 5) {
+                    toast.error("Daily banner update limit reached (5/5). Try again tomorrow.");
                     return;
                   }
                   bannerInputRef.current?.click();
                 }}
-                disabled={uploadingBanner || (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2)}
+                disabled={uploadingBanner || (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 5)}
               >
                 {uploadingBanner ? (bannerProgress || "Uploading...") : "Upload"}
               </Button>
             </div>
             {dailyBannerUploadsCount !== null && (
-              <p className={`text-xs mt-3 ${dailyBannerUploadsCount >= 2 ? 'text-red-400' : 'text-muted-foreground'}`}>
-                Daily updates: {dailyBannerUploadsCount}/2 used
+              <p className={`text-xs mt-3 ${dailyBannerUploadsCount >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
+                Daily updates: {dailyBannerUploadsCount}/5 used
               </p>
             )}
             {bannerLiveCountdown !== null && (
