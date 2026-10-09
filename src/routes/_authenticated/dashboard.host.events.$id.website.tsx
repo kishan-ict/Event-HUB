@@ -1026,6 +1026,8 @@ interface PromptFormData {
   designStyle: string;
   customStyle: string;
   additionalDetails: string;
+  includeCustomCursor: boolean;
+  include3DTilt: boolean;
 }
 
 const EMPTY_FORM: PromptFormData = {
@@ -1041,6 +1043,8 @@ const EMPTY_FORM: PromptFormData = {
   designStyle: "",
   customStyle: "",
   additionalDetails: "",
+  includeCustomCursor: false,
+  include3DTilt: false,
 };
 
 const DESIGN_STYLES = [
@@ -1398,6 +1402,72 @@ function WebsitePromptButton({
     lines.push(`- Every button you create must be working.`);
     lines.push(`- Animate the UI also (e.g., add hover effects, scroll-triggered fade-ins, smooth transitions, and subtle micro-animations to make the interface feel responsive and alive).`);
     lines.push(`- If you do not know what content to add to a button or section, show "Coming Soon" and notify the user: "There is no content in [name of section] section. What would you like to add? Please tell me and I will add it."`);
+
+    if (form.includeCustomCursor) {
+      lines.push(`\n================================================================================`);
+      lines.push(`REUSABLE SPECIFICATION: CUSTOM LIQUID GLASS CURSOR`);
+      lines.push(`================================================================================`);
+      lines.push(`Include a custom liquid glass cursor system with smooth spring physics and dynamic micro-interactions:
+1. Hide the default mouse cursor using CSS \`cursor: none;\` on custom-cursor-enabled elements.
+2. Create a custom cursor container with two main elements:
+   - Inner Core Dot: A small 8px filled circle (#6366f1) that follows the mouse position instantaneously with zero latency.
+   - Liquid Glass Ring: A 44px outer circle featuring glassmorphism styling (\`backdrop-filter: blur(12px) saturate(180%)\`, semi-transparent background \`rgba(255, 255, 255, 0.25)\`, subtle border \`1.5px solid rgba(255, 255, 255, 0.65)\`, and box shadow \`0 8px 32px 0 rgba(99, 102, 241, 0.25)\`).
+3. JavaScript Fluid Physics & Stretching:
+   - Smooth lerp/spring interpolation (around factor 0.18) for smooth trailing physics.
+   - Calculate mouse velocity to apply dynamic liquid stretching: scale down along movement axis and stretch perpendicular to speed, clamping scale between 0.8 and 1.35.
+   - Rotate the stretched oval to match the movement angle direction (\`Math.atan2(deltaY, deltaX)\`).
+4. Hover Micro-Interactions:
+   - Whenever hovering over any interactive element (buttons, links, clickable cards, inputs), expand the outer ring to 68px, change background tint to \`rgba(229, 169, 60, 0.35)\` with an warm accent border, increase blur, and scale the inner core dot to 12px.
+   - Repeat smoothly every single time the mouse enters or re-enters any card or button.
+5. Click Ripple Effect:
+   - On \`mousedown\`, contract the core dot to 4px and expand the outer glass ring with a quick click-scale pulse.
+   - Spawn a temporary expanding ripple ring (\`#D96B43\` terracotta accent) at the click coordinate that scales up to 90px while fading out over 500ms.
+6. Touch Device Fallback:
+   - Wrap all custom cursor JS and CSS inside \`@media (hover: hover) and (pointer: fine)\` checks so native touch inputs on mobile devices are preserved cleanly.`);
+    }
+
+    if (form.include3DTilt) {
+      lines.push(`\n================================================================================`);
+      lines.push(`REUSABLE SPECIFICATION: DYNAMIC 3D TILT & RETRO CARD HOVER SYSTEM`);
+      lines.push(`================================================================================`);
+      lines.push(`1. APPLICABILITY & COVERAGE
+   - Apply this dynamic hover effect to ALL interactive containers across the site, including:
+     • Information cards, feature tiles, and hero feature badges
+     • Participant portal workspace cards and quick-access links
+     • Schedule timeline items, daily tabs, and agenda accordions
+     • Venue info cards, map containers, and location highlights
+     • Primary and secondary CTA buttons, icon buttons, and navigation links
+
+2. PERSPECTIVE & 3D GEOMETRY SETUP
+   - Every card/container element must sit inside a 3D perspective context (\`perspective: 1000px\`).
+   - Cards must have CSS transitions configured so rotation updates during movement are fluid, while smooth easing is applied when resetting on cursor exit:
+     \`transition: transform 0.15s ease-out, box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;\`
+   - Set \`transform-style: preserve-3d;\` and \`will-change: transform;\` to leverage GPU hardware acceleration for liquid-smooth 60+ FPS performance.
+
+3. REAL-TIME MOUSE POSITION CALCULATIONS (JS ENGINE)
+   - On \`mousemove\` over any target card, continuously compute the cursor's exact coordinates relative to the card's bounding box (\`getBoundingClientRect()\`).
+     • Find card center X: \`centerX = rect.left + rect.width / 2\`
+     • Find card center Y: \`centerY = rect.top + rect.height / 2\`
+     • Calculate normalized offsets (ranges from -1 to 1).
+   - Convert offsets to 3D rotation angles (\`rotateX\`, \`rotateY\` max 12 degrees).
+
+4. DYNAMIC TRANSITION & LIFT ON HOVER
+   - While tilted, apply physical lift and depth scaling:
+     \`transform: perspective(1000px) rotateX(\${rotateX}deg) rotateY(\${rotateY}deg) translateY(-8px) translateZ(12px) scale(1.025);\`
+   - Dynamically shift the offset box-shadow relative to mouse angle or tilt direction.
+   - Accentuate borders on hover by transitioning border-color.
+
+5. REPEATABILITY & EVENT RELIABILITY (EVERY SINGLE TIME)
+   - Must work EVERY SINGLE TIME the cursor enters, re-enters, or moves across the card — it must NOT be a one-time animation or CSS keyframe animation that runs once and stops.
+   - Attach dynamic event listeners (\`mouseenter\`, \`mousemove\`, \`mouseleave\`) across all target elements dynamically.
+
+6. INNER DEPTH / LAYER PARALLAX (OPTIONAL INNER ELEMENTS)
+   - For icons, headlines, or badges inside cards, give them elevated \`transform: translateZ(25px)\` relative to the card base so they pop off the background plane in true 3D space as the card tilts.
+
+7. RESPONSIVE / TOUCH DEGRADATION
+   - Wrap interactive 3D tilt calculations inside a pointer check (\`window.matchMedia('(pointer: fine)').matches\`) so mobile touch devices fallback smoothly to simple active/tap press states without breaking touch scrolling.`);
+    }
+
     lines.push(`\nRemember: Give me the FULL CODE in ONE single HTML file (HTML + CSS + JS combined). I will paste this directly into my website builder code editor.`);
 
     return lines.join("\n");
@@ -1589,6 +1659,36 @@ function WebsitePromptButton({
                 value={form.additionalDetails}
                 onChange={(e) => update("additionalDetails", e.target.value)}
               />
+            </div>
+
+            {/* Advanced Effect Toggles */}
+            <div className="space-y-3 rounded-lg border border-border/60 bg-surface/30 p-4">
+              <Label className="text-base text-purple-400 flex items-center gap-2">
+                <Sparkles className="h-4 w-4" /> Advanced Interactive Effects
+              </Label>
+              <p className="text-xs text-muted-foreground">Ask the AI to include complex javascript animations to make your site pop.</p>
+              
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch 
+                  id="wp-cursor" 
+                  checked={form.includeCustomCursor}
+                  onCheckedChange={(checked) => update("includeCustomCursor", checked)}
+                />
+                <Label htmlFor="wp-cursor" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Liquid Glass Custom Cursor
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="wp-3dtilt" 
+                  checked={form.include3DTilt}
+                  onCheckedChange={(checked) => update("include3DTilt", checked)}
+                />
+                <Label htmlFor="wp-3dtilt" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Dynamic 3D Tilt Hover Cards
+                </Label>
+              </div>
             </div>
 
             {/* Registration link preview */}
