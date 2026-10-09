@@ -173,7 +173,7 @@ function HostDashboard() {
                       </div>
                       {e.is_published && (
                         <a
-                          href={`https://event-hub.pages.dev/event/${e.slug}`}
+                          href={`https://event-aleropath.pages.dev/event/${e.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-2 block text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"

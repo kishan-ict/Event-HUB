@@ -184,7 +184,7 @@ function FormBuilder() {
           </label>
           {event?.slug && (
             <a
-              href={`https://event-hub.pages.dev/event/${event.slug}/form/register`}
+              href={`https://event-aleropath.pages.dev/event/${event.slug}/form/register`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-sm font-medium hover:bg-surface"

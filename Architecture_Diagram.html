@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event-HUB Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: {
+            primaryColor: '#2c3e50',
+            primaryTextColor: '#fff',
+            primaryBorderColor: '#e74c3c',
+            lineColor: '#bdc3c7',
+            secondaryColor: '#e74c3c',
+            tertiaryColor: '#34495e'
+        }});
+    </script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212; /* Dark theme to match the previous one */
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .mermaid {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mermaid">
+        flowchart LR
+            %% Frontend Layer
+            subgraph Frontend [Frontend Client]
+                UI[React + Vite UI]
+                Router[TanStack Router]
+                UI --> Router
+            end
+
+            %% Backend Layer
+            subgraph Backend [Supabase Backend]
+                Auth[Authentication]
+                DB[(PostgreSQL DB)]
+                Storage[Object Storage]
+            end
+
+            %% Hosting
+            subgraph Hosting [Cloudflare]
+                Edge[Cloudflare Pages Edge Network]
+            end
+
+            %% Connections
+            Router <-->|REST / Real-time| Auth
+            Router <-->|Supabase Client| DB
+            Router -->|File Uploads| Storage
+            
+            Frontend -.->|Deployed on| Edge
+
+            %% Styling
+            style Frontend fill:#111,stroke:#3498db,stroke-width:2px,color:#fff
+            style Backend fill:#111,stroke:#2ecc71,stroke-width:2px,color:#fff
+            style Hosting fill:#111,stroke:#f39c12,stroke-width:2px,color:#fff
+            
+            style UI fill:#3498db,stroke:#2980b9,color:#fff
+            style DB fill:#2ecc71,stroke:#27ae60,color:#fff
+            style Auth fill:#2ecc71,stroke:#27ae60,color:#fff
+            style Edge fill:#f39c12,stroke:#d35400,color:#fff
+    </div>
+
+</body>
+</html>

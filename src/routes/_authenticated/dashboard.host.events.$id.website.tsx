@@ -604,7 +604,7 @@ function WebsiteBuilder() {
               </a>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`https://event-hub.pages.dev/event/${event?.slug}`);
+                  navigator.clipboard.writeText(`https://event-aleropath.pages.dev/event/${event?.slug}`);
                   toast.success("URL copied to clipboard");
                 }}
                 className="inline-flex items-center hover:text-foreground text-muted-foreground transition-colors shrink-0"
@@ -972,7 +972,7 @@ function WebsitePromptButton({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://event-hub.pages.dev";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://event-aleropath.pages.dev";
   const registrationLink = `${origin}/event/${slug}/form/register`;
   const workspaceLink = `${origin}/dashboard/participant/events/${id}/info`;
   const announcementsLink = `${origin}/dashboard/participant/events/${id}/announcements`;

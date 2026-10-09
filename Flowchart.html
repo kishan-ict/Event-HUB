@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event-HUB Flowchart</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
+            primaryColor: '#ffcccc',
+            primaryTextColor: '#000',
+            primaryBorderColor: '#e74c3c',
+            lineColor: '#2c3e50',
+            secondaryColor: '#f1c40f',
+            tertiaryColor: '#3498db'
+        }});
+    </script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fcfaf5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .mermaid {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mermaid">
+        graph TD
+            HUB((**Event-HUB**<br/>Core Platform))
+            
+            H[**Host**<br/>Creates & Manages Event]
+            J[**Judge**<br/>Scores & Evaluates]
+            P[**Participant**<br/>Registers & Submits Work]
+            A[**Attender**<br/>Views Schedules & Updates]
+
+            H -->|Admin Control| HUB
+            HUB -->|Dashboard Data| H
+            
+            P -->|Submissions| HUB
+            HUB -->|Event Info| P
+            
+            J -->|Scores/Feedback| HUB
+            HUB -->|Assigned Teams| J
+            
+            HUB -->|Public Schedule| A
+
+            style HUB fill:#e74c3c,stroke:#c0392b,stroke-width:4px,color:#fff
+            style H fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff
+            style J fill:#f1c40f,stroke:#f39c12,stroke-width:2px,color:#000
+            style P fill:#2ecc71,stroke:#27ae60,stroke-width:2px,color:#fff
+            style A fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff
+    </div>
+
+</body>
+</html>

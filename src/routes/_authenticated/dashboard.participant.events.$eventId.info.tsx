@@ -58,7 +58,7 @@ function ParticipantEventInfo() {
             Use the sidebar to manage your team, view announcements, check the schedule, and submit your final project.
           </p>
           <div className="flex gap-4">
-            <a href={`https://event-hub.pages.dev/event/${event.slug}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://event-aleropath.pages.dev/event/${event.slug}`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline">View public website</Button>
             </a>
             <Link to="/dashboard/participant/events/$eventId/team" params={{ eventId }}>

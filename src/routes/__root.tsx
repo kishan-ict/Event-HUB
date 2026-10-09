@@ -86,7 +86,7 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
-  // Domain Enforcer Removed to allow hosting on event-hub.pages.dev
+  // Domain Enforcer Removed to allow hosting on event-aleropath.pages.dev
 
   return (
     <>

@@ -94,7 +94,7 @@ function EventOverviewAdmin() {
             <p className="mt-2 text-sm text-muted-foreground font-mono">/{event.slug}</p>
           </div>
           <div className="flex items-center gap-4">
-            <a href={`https://event-hub.pages.dev/event/${event.slug}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://event-aleropath.pages.dev/event/${event.slug}`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline">View public page</Button>
             </a>
             <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card p-2 px-3">
