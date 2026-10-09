@@ -538,20 +538,27 @@ function WebsiteBuilder() {
   }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, type: "banner" | "logo") {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const originalFile = e.target.files?.[0];
+    if (!originalFile) return;
 
     if (type === "banner") setUploadingBanner(true);
     else setUploadingLogo(true);
 
     try {
+      // Import the compressor dynamically or just assume it's imported at the top. Let's do dynamic import so we don't mess up top-level imports without seeing them.
+      const { compressImage } = await import('@/lib/image-compressor');
+      
+      // WhatsApp strict 250KB limit for Open Graph Images
+      toast.info("Compressing image for social sharing...", { id: "compress-toast" });
+      const file = await compressImage(originalFile, 250);
+      toast.dismiss("compress-toast");
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${id}_${type}_${Math.random()}.${fileExt}`;
       const filePath = `events/${fileName}`;
 
-      // Assuming there is a 'public' or 'events' bucket. Using 'events' as fallback.
       const { error: uploadError, data } = await supabase.storage
-        .from('events') // You might need to create this bucket in Supabase!
+        .from('events') 
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
@@ -565,14 +572,13 @@ function WebsiteBuilder() {
         setLogoUrl(publicUrl);
         await supabase.from("events").update({ logo_url: publicUrl } as never).eq("id", id);
       }
-      toast.success(`${type === "banner" ? "Banner" : "Logo"} uploaded`);
+      toast.success(`${type === "banner" ? "Banner" : "Logo"} uploaded and optimized!`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       if (type === "banner") setUploadingBanner(false);
       else setUploadingLogo(false);
 
-      // Reset input
       if (e.target) e.target.value = '';
     }
   }
