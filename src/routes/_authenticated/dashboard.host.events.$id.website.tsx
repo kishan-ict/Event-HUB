@@ -768,7 +768,7 @@ function WebsiteBuilder() {
               <div className="mt-4 rounded-md bg-amber-500/10 border border-amber-500/20 p-3 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-500" />
                 <p className="text-sm text-amber-500/90 font-medium">
-                  Live across social media in {Math.floor(bannerLiveCountdown / 60)}:{(bannerLiveCountdown % 60).toString().padStart(2, '0')}
+                  Your thumbnail is updating. Please wait until {Math.floor(bannerLiveCountdown / 60)}:{(bannerLiveCountdown % 60).toString().padStart(2, '0')}
                 </p>
               </div>
             )}
