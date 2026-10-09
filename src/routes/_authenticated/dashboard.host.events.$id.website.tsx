@@ -282,6 +282,33 @@ function WebsiteBuilder() {
   const [bannerProgress, setBannerProgress] = useState("");
   const [logoProgress, setLogoProgress] = useState("");
   const [bannerLiveCountdown, setBannerLiveCountdown] = useState<number | null>(null);
+  const [dailyBannerUploadsCount, setDailyBannerUploadsCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchCount() {
+      if (!id) return;
+      try {
+        const { data, error } = await supabase.storage.from('events').list('events', {
+          search: `${id}_banner_`,
+          limit: 100,
+        });
+        if (error) throw error;
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const uploadsToday = data?.filter(file => {
+          if (!file.created_at) return false;
+          return new Date(file.created_at) >= today;
+        }) || [];
+        
+        setDailyBannerUploadsCount(uploadsToday.length);
+      } catch (err) {
+        console.error("Failed to fetch upload count", err);
+      }
+    }
+    fetchCount();
+  }, [id]);
 
   useEffect(() => {
     if (bannerLiveCountdown !== null && bannerLiveCountdown > 0) {
@@ -554,6 +581,12 @@ function WebsiteBuilder() {
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, type: "banner" | "logo") {
     const originalFile = e.target.files?.[0];
     if (!originalFile) return;
+    
+    if (type === "banner" && dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2) {
+      toast.error("Daily banner update limit reached (2/2). Try again tomorrow.");
+      if (e.target) e.target.value = '';
+      return;
+    }
 
     if (type === "banner") {
       setUploadingBanner(true);
@@ -602,6 +635,8 @@ function WebsiteBuilder() {
         } else {
           toast.success("Banner uploaded! You can check it live now.");
         }
+        
+        setDailyBannerUploadsCount(prev => (prev || 0) + 1);
       } else {
         setLogoUrl(publicUrl);
         await supabase.from("events").update({ logo_url: publicUrl } as never).eq("id", id);
@@ -712,12 +747,23 @@ function WebsiteBuilder() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => bannerInputRef.current?.click()}
-                disabled={uploadingBanner}
+                onClick={() => {
+                  if (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2) {
+                    toast.error("Daily banner update limit reached (2/2). Try again tomorrow.");
+                    return;
+                  }
+                  bannerInputRef.current?.click();
+                }}
+                disabled={uploadingBanner || (dailyBannerUploadsCount !== null && dailyBannerUploadsCount >= 2)}
               >
                 {uploadingBanner ? (bannerProgress || "Uploading...") : "Upload"}
               </Button>
             </div>
+            {dailyBannerUploadsCount !== null && (
+              <p className={`text-xs mt-3 ${dailyBannerUploadsCount >= 2 ? 'text-red-400' : 'text-muted-foreground'}`}>
+                Daily updates: {dailyBannerUploadsCount}/2 used
+              </p>
+            )}
             {bannerLiveCountdown !== null && (
               <div className="mt-4 rounded-md bg-amber-500/10 border border-amber-500/20 p-3 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-500" />
