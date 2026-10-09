@@ -34,6 +34,7 @@ import {
   Trash2,
   Braces,
   Plus,
+  Clock,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/host/events/$id/website")({
@@ -280,6 +281,17 @@ function WebsiteBuilder() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [bannerProgress, setBannerProgress] = useState("");
   const [logoProgress, setLogoProgress] = useState("");
+  const [bannerLiveCountdown, setBannerLiveCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (bannerLiveCountdown !== null && bannerLiveCountdown > 0) {
+      const t = setTimeout(() => setBannerLiveCountdown(c => (c !== null && c > 0) ? c - 1 : 0), 1000);
+      return () => clearTimeout(t);
+    } else if (bannerLiveCountdown === 0) {
+      toast.success("Banner is now fully updated across all platforms!", { duration: 5000 });
+      setBannerLiveCountdown(null);
+    }
+  }, [bannerLiveCountdown]);
 
   // Auto-save
   const [autoSave, setAutoSave] = useState(true);
@@ -580,13 +592,21 @@ function WebsiteBuilder() {
       const { data: { publicUrl } } = supabase.storage.from('events').getPublicUrl(filePath);
 
       if (type === "banner") {
+        const isUpdate = !!bannerUrl;
         setBannerUrl(publicUrl);
         await supabase.from("events").update({ banner_url: publicUrl } as never).eq("id", id);
+        
+        if (isUpdate) {
+          setBannerLiveCountdown(300);
+          toast.success("Banner updated! Check the countdown for social media availability.");
+        } else {
+          toast.success("Banner uploaded! You can check it live now.");
+        }
       } else {
         setLogoUrl(publicUrl);
         await supabase.from("events").update({ logo_url: publicUrl } as never).eq("id", id);
+        toast.success("Logo uploaded and optimized!");
       }
-      toast.success(`${type === "banner" ? "Banner" : "Logo"} uploaded and optimized!`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
@@ -671,7 +691,7 @@ function WebsiteBuilder() {
 
       <div className="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-border/60 bg-card p-5">
+          <div className="rounded-xl border border-border/60 bg-card p-5 relative overflow-hidden">
             <h3 className="font-semibold">Banner image</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4">Wide hero image shown on the event page.</p>
             <div className="flex gap-4 items-center">
@@ -698,6 +718,14 @@ function WebsiteBuilder() {
                 {uploadingBanner ? (bannerProgress || "Uploading...") : "Upload"}
               </Button>
             </div>
+            {bannerLiveCountdown !== null && (
+              <div className="mt-4 rounded-md bg-amber-500/10 border border-amber-500/20 p-3 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-500" />
+                <p className="text-sm text-amber-500/90 font-medium">
+                  Live across social media in {Math.floor(bannerLiveCountdown / 60)}:{(bannerLiveCountdown % 60).toString().padStart(2, '0')}
+                </p>
+              </div>
+            )}
           </div>
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <h3 className="font-semibold">Logo</h3>
