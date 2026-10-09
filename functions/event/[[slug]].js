@@ -1,9 +1,11 @@
 export async function onRequestGet(context) {
-  const { request, env, params, next } = context;
+  const { request, env, params } = context;
   const slug = params.slug ? params.slug[0] : null;
 
-  // Fetch the default raw HTML (the React SPA index.html)
-  const response = await next();
+  // We explicitly fetch the root index.html to avoid 404 status codes on dynamic routes
+  const url = new URL(request.url);
+  url.pathname = '/';
+  const response = await env.ASSETS.fetch(url);
 
   // If no slug or not a GET request to the event page, return HTML as-is
   if (!slug) return response;
@@ -37,11 +39,23 @@ export async function onRequestGet(context) {
     const banner = eventData.banner_url || "https://event-aleropath.pages.dev/favicon.png";
     const logo = eventData.logo_url || "/favicon.png";
 
+    // Ensure status is 200 so social scrapers don't ignore it
+    const res = new Response(response.body, response);
+    res.headers.set("content-type", "text/html;charset=UTF-8");
+
     // HTMLRewriter runs on the Edge Server and modifies the raw HTML before sending it to the client (or scraper)
     return new HTMLRewriter()
+      .on('title', {
+        element(e) { e.setInnerContent(`${name} — EVENT-HUB`); }
+      })
+      .on('meta[name="description"]', {
+        element(e) { e.setAttribute("content", desc); }
+      })
+      .on('link[rel="icon"]', {
+        element(e) { e.setAttribute("href", logo); }
+      })
       .on('head', {
         element(e) {
-          e.append(`<title>${name} — EVENT-HUB</title>`, { html: true });
           e.append(`<meta property="og:title" content="${name}">`, { html: true });
           e.append(`<meta property="og:description" content="${desc}">`, { html: true });
           e.append(`<meta property="og:image" content="${banner}">`, { html: true });
@@ -51,11 +65,9 @@ export async function onRequestGet(context) {
           e.append(`<meta name="twitter:title" content="${name}">`, { html: true });
           e.append(`<meta name="twitter:description" content="${desc}">`, { html: true });
           e.append(`<meta name="twitter:image" content="${banner}">`, { html: true });
-          
-          e.append(`<link rel="icon" href="${logo}">`, { html: true });
         }
       })
-      .transform(response);
+      .transform(res);
   }
 
   return response;
