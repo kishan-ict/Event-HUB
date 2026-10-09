@@ -1,16 +1,20 @@
-export async function compressImage(file: File, maxSizeKB: number = 250): Promise<File> {
+export async function compressImage(file: File, maxSizeKB: number = 250, onProgress?: (percent: number) => void): Promise<File> {
   return new Promise((resolve, reject) => {
     // Only compress images
     if (!file.type.startsWith("image/")) {
       return resolve(file);
     }
 
+    if (onProgress) onProgress(10);
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
+      if (onProgress) onProgress(30);
       const img = new Image();
       img.src = event.target?.result as string;
       img.onload = () => {
+        if (onProgress) onProgress(50);
         const canvas = document.createElement("canvas");
         
         // Scale down large images (max 1200px width/height)
@@ -39,8 +43,10 @@ export async function compressImage(file: File, maxSizeKB: number = 250): Promis
 
         let quality = 0.9;
         const targetSize = maxSizeKB * 1024;
+        let currentPercent = 60;
 
         const attemptCompression = () => {
+          if (onProgress) onProgress(currentPercent);
           canvas.toBlob(
             (blob) => {
               if (!blob) return resolve(file);
@@ -51,10 +57,12 @@ export async function compressImage(file: File, maxSizeKB: number = 250): Promis
                   type: "image/jpeg",
                   lastModified: Date.now(),
                 });
+                if (onProgress) onProgress(90);
                 resolve(compressedFile);
               } else {
                 // Otherwise reduce quality and try again
                 quality -= 0.15;
+                currentPercent = Math.min(85, currentPercent + 5);
                 attemptCompression();
               }
             },

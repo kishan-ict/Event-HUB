@@ -278,6 +278,8 @@ function WebsiteBuilder() {
   const [publishing, setPublishing] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [bannerProgress, setBannerProgress] = useState("");
+  const [logoProgress, setLogoProgress] = useState("");
 
   // Auto-save
   const [autoSave, setAutoSave] = useState(true);
@@ -541,17 +543,27 @@ function WebsiteBuilder() {
     const originalFile = e.target.files?.[0];
     if (!originalFile) return;
 
-    if (type === "banner") setUploadingBanner(true);
-    else setUploadingLogo(true);
+    if (type === "banner") {
+      setUploadingBanner(true);
+      setBannerProgress("Compressing... 0%");
+    } else {
+      setUploadingLogo(true);
+      setLogoProgress("Compressing... 0%");
+    }
+
+    const setProgress = (text: string) => {
+      if (type === "banner") setBannerProgress(text);
+      else setLogoProgress(text);
+    };
 
     try {
-      // Import the compressor dynamically or just assume it's imported at the top. Let's do dynamic import so we don't mess up top-level imports without seeing them.
       const { compressImage } = await import('@/lib/image-compressor');
       
-      // WhatsApp strict 250KB limit for Open Graph Images
-      toast.info("Compressing image for social sharing...", { id: "compress-toast" });
-      const file = await compressImage(originalFile, 250);
-      toast.dismiss("compress-toast");
+      const file = await compressImage(originalFile, 250, (percent) => {
+        setProgress(`Compressing... ${percent}%`);
+      });
+
+      setProgress(`Uploading... 90%`);
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${id}_${type}_${Math.random()}.${fileExt}`;
@@ -562,6 +574,8 @@ function WebsiteBuilder() {
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
+
+      setProgress(`Finalizing... 100%`);
 
       const { data: { publicUrl } } = supabase.storage.from('events').getPublicUrl(filePath);
 
@@ -576,8 +590,13 @@ function WebsiteBuilder() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
-      if (type === "banner") setUploadingBanner(false);
-      else setUploadingLogo(false);
+      if (type === "banner") {
+        setUploadingBanner(false);
+        setBannerProgress("");
+      } else {
+        setUploadingLogo(false);
+        setLogoProgress("");
+      }
 
       if (e.target) e.target.value = '';
     }
@@ -676,7 +695,7 @@ function WebsiteBuilder() {
                 onClick={() => bannerInputRef.current?.click()}
                 disabled={uploadingBanner}
               >
-                {uploadingBanner ? "Uploading..." : "Upload"}
+                {uploadingBanner ? (bannerProgress || "Uploading...") : "Upload"}
               </Button>
             </div>
           </div>
@@ -704,7 +723,7 @@ function WebsiteBuilder() {
                 onClick={() => logoInputRef.current?.click()}
                 disabled={uploadingLogo}
               >
-                {uploadingLogo ? "Uploading..." : "Upload"}
+                {uploadingLogo ? (logoProgress || "Uploading...") : "Upload"}
               </Button>
             </div>
           </div>
