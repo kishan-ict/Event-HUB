@@ -38,4 +38,7 @@ To run this project locally:
    ```
 
 ## 👥 Team Members
-*(Add your team member names here!)*
+- **KISHAN M PATIL** (Leader)
+- **Kiran Patil**
+- **Saif Shaikh**
+- **Harsh Singh**
