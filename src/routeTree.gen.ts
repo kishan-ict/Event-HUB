@@ -26,9 +26,11 @@ import { Route as AuthenticatedDashboardHostRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardAttenderRouteImport } from './routes/_authenticated/dashboard.attender'
 import { Route as AuthenticatedDashboardAttenderIndexRouteImport } from './routes/_authenticated/dashboard.attender.index'
 import { Route as AuthenticatedEventSlugSubmitRouteImport } from './routes/_authenticated/event.$slug.submit'
+import { Route as AuthenticatedDashboardHostGuideRouteImport } from './routes/_authenticated/dashboard.host.guide'
 import { Route as AuthenticatedDashboardAttenderScanRouteImport } from './routes/_authenticated/dashboard.attender.scan'
 import { Route as AuthenticatedDashboardAttenderHistoryRouteImport } from './routes/_authenticated/dashboard.attender.history'
 import { Route as AuthenticatedEventSlugFormRegisterRouteImport } from './routes/_authenticated/event.$slug.form.register'
+import { Route as AuthenticatedDashboardHostEventsIdRouteImport } from './routes/_authenticated/dashboard.host.events.$id'
 import { Route as AuthenticatedDashboardHostEventsIdIndexRouteImport } from './routes/_authenticated/dashboard.host.events.$id.index'
 import { Route as AuthenticatedDashboardParticipantEventsEventIdTeamRouteImport } from './routes/_authenticated/dashboard.participant.events.$eventId.team'
 import { Route as AuthenticatedDashboardParticipantEventsEventIdSubmissionsRouteImport } from './routes/_authenticated/dashboard.participant.events.$eventId.submissions'
@@ -140,6 +142,12 @@ const AuthenticatedEventSlugSubmitRoute =
     path: '/event/$slug/submit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardHostGuideRoute =
+  AuthenticatedDashboardHostGuideRouteImport.update({
+    id: '/guide',
+    path: '/guide',
+    getParentRoute: () => AuthenticatedDashboardHostRoute,
+  } as any)
 const AuthenticatedDashboardAttenderScanRoute =
   AuthenticatedDashboardAttenderScanRouteImport.update({
     id: '/scan',
@@ -158,11 +166,17 @@ const AuthenticatedEventSlugFormRegisterRoute =
     path: '/event/$slug/form/register',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardHostEventsIdRoute =
+  AuthenticatedDashboardHostEventsIdRouteImport.update({
+    id: '/events/$id',
+    path: '/events/$id',
+    getParentRoute: () => AuthenticatedDashboardHostRoute,
+  } as any)
 const AuthenticatedDashboardHostEventsIdIndexRoute =
   AuthenticatedDashboardHostEventsIdIndexRouteImport.update({
-    id: '/events/$id/',
-    path: '/events/$id/',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardParticipantEventsEventIdTeamRoute =
   AuthenticatedDashboardParticipantEventsEventIdTeamRouteImport.update({
@@ -204,69 +218,69 @@ const AuthenticatedDashboardJudgeEventsEventIdScheduleRoute =
   } as any)
 const AuthenticatedDashboardHostEventsIdWebsiteRoute =
   AuthenticatedDashboardHostEventsIdWebsiteRouteImport.update({
-    id: '/events/$id/website',
-    path: '/events/$id/website',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/website',
+    path: '/website',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdSubmissionsRoute =
   AuthenticatedDashboardHostEventsIdSubmissionsRouteImport.update({
-    id: '/events/$id/submissions',
-    path: '/events/$id/submissions',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdSettingsRoute =
   AuthenticatedDashboardHostEventsIdSettingsRouteImport.update({
-    id: '/events/$id/settings',
-    path: '/events/$id/settings',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdScoresRoute =
   AuthenticatedDashboardHostEventsIdScoresRouteImport.update({
-    id: '/events/$id/scores',
-    path: '/events/$id/scores',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/scores',
+    path: '/scores',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdScheduleRoute =
   AuthenticatedDashboardHostEventsIdScheduleRouteImport.update({
-    id: '/events/$id/schedule',
-    path: '/events/$id/schedule',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/schedule',
+    path: '/schedule',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdRegistrationsRoute =
   AuthenticatedDashboardHostEventsIdRegistrationsRouteImport.update({
-    id: '/events/$id/registrations',
-    path: '/events/$id/registrations',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/registrations',
+    path: '/registrations',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdJudgesRoute =
   AuthenticatedDashboardHostEventsIdJudgesRouteImport.update({
-    id: '/events/$id/judges',
-    path: '/events/$id/judges',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/judges',
+    path: '/judges',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdFormRoute =
   AuthenticatedDashboardHostEventsIdFormRouteImport.update({
-    id: '/events/$id/form',
-    path: '/events/$id/form',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/form',
+    path: '/form',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdAttendersRoute =
   AuthenticatedDashboardHostEventsIdAttendersRouteImport.update({
-    id: '/events/$id/attenders',
-    path: '/events/$id/attenders',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/attenders',
+    path: '/attenders',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdAnnouncementsRoute =
   AuthenticatedDashboardHostEventsIdAnnouncementsRouteImport.update({
-    id: '/events/$id/announcements',
-    path: '/events/$id/announcements',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardHostEventsIdAnalyticsRoute =
   AuthenticatedDashboardHostEventsIdAnalyticsRouteImport.update({
-    id: '/events/$id/analytics',
-    path: '/events/$id/analytics',
-    getParentRoute: () => AuthenticatedDashboardHostRoute,
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedDashboardHostEventsIdRoute,
   } as any)
 const AuthenticatedDashboardJudgeEventsEventIdSubmissionsSubmissionIdRoute =
   AuthenticatedDashboardJudgeEventsEventIdSubmissionsSubmissionIdRouteImport.update(
@@ -294,8 +308,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/attender/history': typeof AuthenticatedDashboardAttenderHistoryRoute
   '/dashboard/attender/scan': typeof AuthenticatedDashboardAttenderScanRoute
+  '/dashboard/host/guide': typeof AuthenticatedDashboardHostGuideRoute
   '/event/$slug/submit': typeof AuthenticatedEventSlugSubmitRoute
   '/dashboard/attender/': typeof AuthenticatedDashboardAttenderIndexRoute
+  '/dashboard/host/events/$id': typeof AuthenticatedDashboardHostEventsIdRouteWithChildren
   '/event/$slug/form/register': typeof AuthenticatedEventSlugFormRegisterRoute
   '/dashboard/host/events/$id/analytics': typeof AuthenticatedDashboardHostEventsIdAnalyticsRoute
   '/dashboard/host/events/$id/announcements': typeof AuthenticatedDashboardHostEventsIdAnnouncementsRoute
@@ -333,6 +349,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/attender/history': typeof AuthenticatedDashboardAttenderHistoryRoute
   '/dashboard/attender/scan': typeof AuthenticatedDashboardAttenderScanRoute
+  '/dashboard/host/guide': typeof AuthenticatedDashboardHostGuideRoute
   '/event/$slug/submit': typeof AuthenticatedEventSlugSubmitRoute
   '/dashboard/attender': typeof AuthenticatedDashboardAttenderIndexRoute
   '/event/$slug/form/register': typeof AuthenticatedEventSlugFormRegisterRoute
@@ -375,8 +392,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/attender/history': typeof AuthenticatedDashboardAttenderHistoryRoute
   '/_authenticated/dashboard/attender/scan': typeof AuthenticatedDashboardAttenderScanRoute
+  '/_authenticated/dashboard/host/guide': typeof AuthenticatedDashboardHostGuideRoute
   '/_authenticated/event/$slug/submit': typeof AuthenticatedEventSlugSubmitRoute
   '/_authenticated/dashboard/attender/': typeof AuthenticatedDashboardAttenderIndexRoute
+  '/_authenticated/dashboard/host/events/$id': typeof AuthenticatedDashboardHostEventsIdRouteWithChildren
   '/_authenticated/event/$slug/form/register': typeof AuthenticatedEventSlugFormRegisterRoute
   '/_authenticated/dashboard/host/events/$id/analytics': typeof AuthenticatedDashboardHostEventsIdAnalyticsRoute
   '/_authenticated/dashboard/host/events/$id/announcements': typeof AuthenticatedDashboardHostEventsIdAnnouncementsRoute
@@ -417,8 +436,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/attender/history'
     | '/dashboard/attender/scan'
+    | '/dashboard/host/guide'
     | '/event/$slug/submit'
     | '/dashboard/attender/'
+    | '/dashboard/host/events/$id'
     | '/event/$slug/form/register'
     | '/dashboard/host/events/$id/analytics'
     | '/dashboard/host/events/$id/announcements'
@@ -456,6 +477,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/attender/history'
     | '/dashboard/attender/scan'
+    | '/dashboard/host/guide'
     | '/event/$slug/submit'
     | '/dashboard/attender'
     | '/event/$slug/form/register'
@@ -497,8 +519,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/dashboard/attender/history'
     | '/_authenticated/dashboard/attender/scan'
+    | '/_authenticated/dashboard/host/guide'
     | '/_authenticated/event/$slug/submit'
     | '/_authenticated/dashboard/attender/'
+    | '/_authenticated/dashboard/host/events/$id'
     | '/_authenticated/event/$slug/form/register'
     | '/_authenticated/dashboard/host/events/$id/analytics'
     | '/_authenticated/dashboard/host/events/$id/announcements'
@@ -655,6 +679,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventSlugSubmitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/host/guide': {
+      id: '/_authenticated/dashboard/host/guide'
+      path: '/guide'
+      fullPath: '/dashboard/host/guide'
+      preLoaderRoute: typeof AuthenticatedDashboardHostGuideRouteImport
+      parentRoute: typeof AuthenticatedDashboardHostRoute
+    }
     '/_authenticated/dashboard/attender/scan': {
       id: '/_authenticated/dashboard/attender/scan'
       path: '/scan'
@@ -676,12 +707,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventSlugFormRegisterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/host/events/$id': {
+      id: '/_authenticated/dashboard/host/events/$id'
+      path: '/events/$id'
+      fullPath: '/dashboard/host/events/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdRouteImport
+      parentRoute: typeof AuthenticatedDashboardHostRoute
+    }
     '/_authenticated/dashboard/host/events/$id/': {
       id: '/_authenticated/dashboard/host/events/$id/'
-      path: '/events/$id'
+      path: '/'
       fullPath: '/dashboard/host/events/$id/'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdIndexRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/participant/events/$eventId/team': {
       id: '/_authenticated/dashboard/participant/events/$eventId/team'
@@ -727,80 +765,80 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/dashboard/host/events/$id/website': {
       id: '/_authenticated/dashboard/host/events/$id/website'
-      path: '/events/$id/website'
+      path: '/website'
       fullPath: '/dashboard/host/events/$id/website'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdWebsiteRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/submissions': {
       id: '/_authenticated/dashboard/host/events/$id/submissions'
-      path: '/events/$id/submissions'
+      path: '/submissions'
       fullPath: '/dashboard/host/events/$id/submissions'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdSubmissionsRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/settings': {
       id: '/_authenticated/dashboard/host/events/$id/settings'
-      path: '/events/$id/settings'
+      path: '/settings'
       fullPath: '/dashboard/host/events/$id/settings'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdSettingsRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/scores': {
       id: '/_authenticated/dashboard/host/events/$id/scores'
-      path: '/events/$id/scores'
+      path: '/scores'
       fullPath: '/dashboard/host/events/$id/scores'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdScoresRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/schedule': {
       id: '/_authenticated/dashboard/host/events/$id/schedule'
-      path: '/events/$id/schedule'
+      path: '/schedule'
       fullPath: '/dashboard/host/events/$id/schedule'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdScheduleRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/registrations': {
       id: '/_authenticated/dashboard/host/events/$id/registrations'
-      path: '/events/$id/registrations'
+      path: '/registrations'
       fullPath: '/dashboard/host/events/$id/registrations'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdRegistrationsRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/judges': {
       id: '/_authenticated/dashboard/host/events/$id/judges'
-      path: '/events/$id/judges'
+      path: '/judges'
       fullPath: '/dashboard/host/events/$id/judges'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdJudgesRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/form': {
       id: '/_authenticated/dashboard/host/events/$id/form'
-      path: '/events/$id/form'
+      path: '/form'
       fullPath: '/dashboard/host/events/$id/form'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdFormRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/attenders': {
       id: '/_authenticated/dashboard/host/events/$id/attenders'
-      path: '/events/$id/attenders'
+      path: '/attenders'
       fullPath: '/dashboard/host/events/$id/attenders'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdAttendersRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/announcements': {
       id: '/_authenticated/dashboard/host/events/$id/announcements'
-      path: '/events/$id/announcements'
+      path: '/announcements'
       fullPath: '/dashboard/host/events/$id/announcements'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdAnnouncementsRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/host/events/$id/analytics': {
       id: '/_authenticated/dashboard/host/events/$id/analytics'
-      path: '/events/$id/analytics'
+      path: '/analytics'
       fullPath: '/dashboard/host/events/$id/analytics'
       preLoaderRoute: typeof AuthenticatedDashboardHostEventsIdAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedDashboardHostRoute
+      parentRoute: typeof AuthenticatedDashboardHostEventsIdRoute
     }
     '/_authenticated/dashboard/judge/events/$eventId/submissions/$submissionId': {
       id: '/_authenticated/dashboard/judge/events/$eventId/submissions/$submissionId'
@@ -833,7 +871,7 @@ const AuthenticatedDashboardAttenderRouteWithChildren =
     AuthenticatedDashboardAttenderRouteChildren,
   )
 
-interface AuthenticatedDashboardHostRouteChildren {
+interface AuthenticatedDashboardHostEventsIdRouteChildren {
   AuthenticatedDashboardHostEventsIdAnalyticsRoute: typeof AuthenticatedDashboardHostEventsIdAnalyticsRoute
   AuthenticatedDashboardHostEventsIdAnnouncementsRoute: typeof AuthenticatedDashboardHostEventsIdAnnouncementsRoute
   AuthenticatedDashboardHostEventsIdAttendersRoute: typeof AuthenticatedDashboardHostEventsIdAttendersRoute
@@ -848,7 +886,7 @@ interface AuthenticatedDashboardHostRouteChildren {
   AuthenticatedDashboardHostEventsIdIndexRoute: typeof AuthenticatedDashboardHostEventsIdIndexRoute
 }
 
-const AuthenticatedDashboardHostRouteChildren: AuthenticatedDashboardHostRouteChildren =
+const AuthenticatedDashboardHostEventsIdRouteChildren: AuthenticatedDashboardHostEventsIdRouteChildren =
   {
     AuthenticatedDashboardHostEventsIdAnalyticsRoute:
       AuthenticatedDashboardHostEventsIdAnalyticsRoute,
@@ -874,6 +912,23 @@ const AuthenticatedDashboardHostRouteChildren: AuthenticatedDashboardHostRouteCh
       AuthenticatedDashboardHostEventsIdWebsiteRoute,
     AuthenticatedDashboardHostEventsIdIndexRoute:
       AuthenticatedDashboardHostEventsIdIndexRoute,
+  }
+
+const AuthenticatedDashboardHostEventsIdRouteWithChildren =
+  AuthenticatedDashboardHostEventsIdRoute._addFileChildren(
+    AuthenticatedDashboardHostEventsIdRouteChildren,
+  )
+
+interface AuthenticatedDashboardHostRouteChildren {
+  AuthenticatedDashboardHostGuideRoute: typeof AuthenticatedDashboardHostGuideRoute
+  AuthenticatedDashboardHostEventsIdRoute: typeof AuthenticatedDashboardHostEventsIdRouteWithChildren
+}
+
+const AuthenticatedDashboardHostRouteChildren: AuthenticatedDashboardHostRouteChildren =
+  {
+    AuthenticatedDashboardHostGuideRoute: AuthenticatedDashboardHostGuideRoute,
+    AuthenticatedDashboardHostEventsIdRoute:
+      AuthenticatedDashboardHostEventsIdRouteWithChildren,
   }
 
 const AuthenticatedDashboardHostRouteWithChildren =

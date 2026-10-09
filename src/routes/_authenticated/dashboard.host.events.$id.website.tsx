@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -460,8 +462,30 @@ function WebsiteBuilder() {
       setHistory([initialHtml]);
       setHistoryIndex(0);
       isInitialLoad.current = true;
+      
+      // Start Tour if they haven't seen it for this event
+      const tourKey = `host-website-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-prompt-generator', popover: { title: 'AI Prompt Generator ✨', description: 'Start here! Generate a detailed prompt to paste into Gemini or Claude. It will write the entire website code for you.', side: "bottom", align: 'start' } },
+              { element: '#tour-code-editor', popover: { title: 'Code Editor &lt;/&gt;', description: 'Paste the generated HTML and Tailwind CSS code here. It saves automatically!', side: "right", align: 'start' } },
+              { element: '#tour-live-preview', popover: { title: 'Live Preview 📱', description: 'See your website update instantly in real-time. You can toggle mobile/tablet views too.', side: "left", align: 'start' } },
+              { element: '#tour-publish', popover: { title: 'Go Live! 🚀', description: 'When you are happy with the design, hit Publish to make it visible to the world.', side: "bottom", align: 'end' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500); // Give UI time to render
+      }
     }
-  }, [event]);
+  }, [event, id]);
 
   // Push to undo history when html changes (not from undo/redo)
   useEffect(() => {
@@ -718,7 +742,7 @@ function WebsiteBuilder() {
             <Save className="h-4 w-4 mr-2" />
             {saving ? "Saving…" : "Save"}
           </Button>
-          <Button className="bg-brand text-brand-foreground hover:bg-brand/90 flex-1 sm:flex-none" onClick={togglePublish} disabled={publishing}>
+          <Button id="tour-publish" className="bg-brand text-brand-foreground hover:bg-brand/90 flex-1 sm:flex-none" onClick={togglePublish} disabled={publishing}>
             {event?.is_published ? "Unpublish" : "Publish"}
           </Button>
         </div>
@@ -804,7 +828,7 @@ function WebsiteBuilder() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 lg:h-[600px]">
-          <div className={`order-2 lg:order-1 flex flex-col rounded-xl border border-border/60 bg-[#1e1e1e] overflow-hidden transition-all ${isMaximized
+          <div id="tour-code-editor" className={`order-2 lg:order-1 flex flex-col rounded-xl border border-border/60 bg-[#1e1e1e] overflow-hidden transition-all ${isMaximized
               ? "fixed inset-0 z-50 h-screen w-screen rounded-none border-none"
               : "h-[450px] lg:h-auto"
             }`}>
@@ -961,7 +985,7 @@ function WebsiteBuilder() {
               />
             </div>
           </div>
-          <div className="order-1 lg:order-2 flex flex-col rounded-xl border border-border/60 bg-card overflow-hidden h-[400px] lg:h-auto">
+          <div id="tour-live-preview" className="order-1 lg:order-2 flex flex-col rounded-xl border border-border/60 bg-card overflow-hidden h-[400px] lg:h-auto">
             <div className="flex items-center justify-between px-4 py-2 border-b border-border/60 bg-surface/50">
               <span className="text-sm font-medium">Live preview</span>
               <div className="flex items-center gap-1 rounded-md border border-border/60 p-0.5 bg-background">
@@ -1537,11 +1561,16 @@ function WebsitePromptButton({
   return (
     <>
       <Button
+        id="tour-prompt-generator"
         variant="outline"
-        className="flex-1 sm:flex-none gap-2 border-purple-500/40 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300"
+        className="flex-1 sm:flex-none gap-2 border-purple-500/40 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 relative"
         onClick={() => setOpen(true)}
       >
         <Sparkles className="h-4 w-4" /> Generate AI Prompt (Gemini / Claude)
+        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+        </span>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
