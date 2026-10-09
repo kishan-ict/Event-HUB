@@ -412,18 +412,21 @@ export function EmptyState({
   title,
   description,
   icon: Icon = LayoutDashboard,
+  children,
 }: {
   title: string;
   description: string;
   icon?: ComponentType<{ className?: string }>;
+  children?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-border/60 bg-surface/30 p-10 text-center">
-      <div className="mx-auto grid h-10 w-10 place-items-center rounded-lg border border-border/60 bg-surface-elevated">
+    <div className="rounded-xl border border-dashed border-border/60 bg-surface/30 p-10 text-center flex flex-col items-center">
+      <div className="grid h-10 w-10 place-items-center rounded-lg border border-border/60 bg-surface-elevated">
         <Icon className="h-5 w-5 text-muted-foreground" />
       </div>
       <h3 className="mt-4 text-base font-semibold">{title}</h3>
-      <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+      {children && <div className="mt-6">{children}</div>}
     </div>
   );
 }

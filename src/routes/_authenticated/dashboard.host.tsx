@@ -121,8 +121,17 @@ function HostDashboard() {
                 <EmptyState
                   icon={Calendar}
                   title="No events yet"
-                  description="Create your first event to get started with registrations and judging."
-                />
+                  description="Create your first event to get started with registrations and judging, or read the host guide to get up to speed."
+                >
+                  <div className="flex items-center gap-3">
+                    <Link to="/events/create">
+                      <Button>Create your first event</Button>
+                    </Link>
+                    <Link to="/dashboard/host/guide">
+                      <Button variant="outline">Read the Host Guide</Button>
+                    </Link>
+                  </div>
+                </EmptyState>
               ) : (
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {events!.map((e) => (
