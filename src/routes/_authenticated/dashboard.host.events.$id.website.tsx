@@ -1048,14 +1048,62 @@ const EMPTY_FORM: PromptFormData = {
 };
 
 const DESIGN_STYLES = [
-  { id: "cyber", label: "Cyber / Neon", emoji: "⚡", desc: "Dark background, neon glows, futuristic vibes" },
-  { id: "luxury", label: "Luxury / Elegant", emoji: "✨", desc: "Gold accents, serif fonts, premium feel" },
-  { id: "minimal", label: "Minimal / Clean", emoji: "◻️", desc: "Whitespace, simple typography, subtle" },
-  { id: "retro", label: "Retro / Vintage", emoji: "📻", desc: "Warm tones, retro fonts, nostalgic" },
-  { id: "glass", label: "Glassmorphism", emoji: "🔮", desc: "Frosted glass, blur effects, translucent" },
-  { id: "bold", label: "Bold / Colorful", emoji: "🎨", desc: "Vibrant gradients, big text, energetic" },
-  { id: "corporate", label: "Corporate / Pro", emoji: "🏢", desc: "Professional, structured, trustworthy" },
-  { id: "nature", label: "Nature / Organic", emoji: "🌿", desc: "Earth tones, natural textures, calming" },
+  { 
+    id: "cyber", 
+    label: "Cyber / Neon", 
+    emoji: "⚡", 
+    desc: "Dark background, neon glows, futuristic vibes",
+    aiPrompt: "A highly futuristic, cyberpunk-inspired aesthetic. Use deep dark backgrounds (#05050a) contrasted with vibrant, high-intensity neon glowing accents. Typography should be technical, monospaced or sans-serif (e.g., Space Grotesk). Include glowing borders, scanline effects, grid backgrounds, and a high-tech, hacker-centric vibe."
+  },
+  { 
+    id: "luxury", 
+    label: "Luxury / Elegant", 
+    emoji: "✨", 
+    desc: "Gold accents, serif fonts, premium feel",
+    aiPrompt: "A premium, high-end luxury aesthetic. Use deep rich backgrounds (like charcoal or black) with elegant gold or champagne accents. Typography must heavily rely on refined, sophisticated serif fonts (e.g., Playfair Display) paired with clean sans-serifs for body text. Utilize thin, delicate borders, ample whitespace, and subtle fade-in animations for a feeling of exclusivity."
+  },
+  { 
+    id: "minimal", 
+    label: "Minimal / Clean", 
+    emoji: "◻️", 
+    desc: "Whitespace, simple typography, subtle",
+    aiPrompt: "An ultra-minimalist, stark, and clean aesthetic heavily inspired by Dieter Rams and modern Swiss design. Maximize whitespace and use extremely structured, grid-based layouts. Typography must be highly legible sans-serif (e.g., Inter, Plus Jakarta Sans) with perfect kerning and line height. Remove all unnecessary borders, relying only on spacing and very faint, subtle drop shadows to create hierarchy."
+  },
+  { 
+    id: "retro", 
+    label: "Retro / Vintage", 
+    emoji: "📻", 
+    desc: "Warm tones, retro fonts, nostalgic",
+    aiPrompt: "A nostalgic, 90s/80s retro-vintage aesthetic. Use warm, sepia-tinted, or pastel color palettes (e.g., cream, faded orange, teal). Typography should feature chunky, bold, slightly quirky serif or display fonts (like Syne or Cooper Black). Include brutalist elements like thick, dark solid borders (e.g., 3px solid #2d2219), hard drop shadows with no blur (e.g., 4px 4px 0px black), and perhaps subtle noise or grain overlays."
+  },
+  { 
+    id: "glass", 
+    label: "Glassmorphism", 
+    emoji: "🔮", 
+    desc: "Frosted glass, blur effects, translucent",
+    aiPrompt: "A modern glassmorphism aesthetic. The background should feature abstract, vibrant glowing orbs or mesh gradients. UI elements (cards, navbars, modals) must appear as frosted glass, utilizing `backdrop-filter: blur(16px)`, semi-transparent white/dark backgrounds (e.g., rgba(255,255,255,0.05)), and delicate 1px borders to simulate edge lighting. The overall feel should be ethereal, multi-layered, and deeply 3D."
+  },
+  { 
+    id: "bold", 
+    label: "Bold / Colorful", 
+    emoji: "🎨", 
+    desc: "Vibrant gradients, big text, energetic",
+    aiPrompt: "An energetic, loud, and brutally bold aesthetic. Use intensely vibrant, highly saturated gradients and high-contrast color pairings. Typography should be massive, oversized, and heavy/black weights, dominating the screen space. Embrace brutalist layouts with overlapping elements, marquee scrolling text, dramatic angles, and playful, bouncy animations. Make it feel incredibly alive and unapologetic."
+  },
+  { 
+    id: "corporate", 
+    label: "Corporate / Pro", 
+    emoji: "🏢", 
+    desc: "Professional, structured, trustworthy",
+    aiPrompt: "A highly professional, enterprise-grade corporate aesthetic. Use a trustworthy color palette of deep navy blues, slate grays, and crisp whites. Layouts must be highly structured, modular, and symmetrical (like a top-tier SaaS landing page). Use dependable sans-serif typography. Animations should be swift, functional, and purely to aid user flow, avoiding anything overly flashy."
+  },
+  { 
+    id: "nature", 
+    label: "Nature / Organic", 
+    emoji: "🌿", 
+    desc: "Earth tones, natural textures, calming",
+    aiPrompt: "An organic, calming, and nature-inspired aesthetic. Color palettes should consist of muted earth tones: sage greens, warm terracottas, sand, and soft browns. Typography should lean towards elegant, soft serifs or friendly, rounded sans-serifs. Utilize organic shapes, soft rounded corners, and gentle, slow-paced fade animations to evoke a sense of peace and environmental grounding."
+  },
 ] as const;
 
 function WebsitePromptButton({
@@ -1376,8 +1424,9 @@ function WebsitePromptButton({
       : DESIGN_STYLES.find(s => s.id === form.designStyle);
     if (form.designStyle === "custom" && form.customStyle) {
       lines.push(`Design Style: ${form.customStyle}`);
-    } else if (styleName && typeof styleName === "object") {
-      lines.push(`Design Style: ${styleName.label} — ${styleName.desc}`);
+    } else if (styleName && typeof styleName === "object" && 'aiPrompt' in styleName) {
+      lines.push(`Design Style: ${styleName.label}`);
+      lines.push(`Aesthetic Instructions: ${styleName.aiPrompt}`);
     }
 
     if (form.additionalDetails) lines.push(`\nAdditional Details:\n${form.additionalDetails}`);
