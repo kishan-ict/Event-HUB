@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { assignJudgeByEmail } from "@/lib/judges.functions";
 import { Button } from "@/components/ui/button";
@@ -69,6 +71,30 @@ function JudgesAdmin() {
     },
   });
 
+  useEffect(() => {
+    if (event) {
+      const tourKey = `host-judges-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-judges-categories', popover: { title: 'Categories 🏷️', description: 'Define the different categories or tracks your participants will be grouped into.', side: "bottom", align: 'start' } },
+              { element: '#tour-judges-criteria', popover: { title: 'Judging Criteria 🎯', description: 'What are you grading on? Add criteria like "Design", "Code Quality", etc., and set max scores.', side: "bottom", align: 'start' } },
+              { element: '#tour-judges-invite', popover: { title: 'Invite Judges 👨‍⚖️', description: 'Invite people via their email to become judges. They will get their own dashboard to score participants!', side: "top", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center gap-3 border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur">
@@ -86,22 +112,28 @@ function JudgesAdmin() {
         </div>
       </header>
       <main className="mx-auto max-w-4xl space-y-8 px-6 py-8">
-        <CategoriesEditor
-          eventId={id}
-          categories={event?.categories ?? []}
-          onSaved={() => qc.invalidateQueries({ queryKey: ["event-judges-info", id] })}
-        />
-        <CriteriaEditor
-          eventId={id}
-          criteria={criteria ?? []}
-          onChange={() => qc.invalidateQueries({ queryKey: ["criteria", id] })}
-        />
-        <JudgesSection
-          eventId={id}
-          categories={event?.categories ?? []}
-          assignments={assignments ?? []}
-          onChange={() => qc.invalidateQueries({ queryKey: ["judge-assignments", id] })}
-        />
+        <div id="tour-judges-categories">
+          <CategoriesEditor
+            eventId={id}
+            categories={event?.categories ?? []}
+            onSaved={() => qc.invalidateQueries({ queryKey: ["event-judges-info", id] })}
+          />
+        </div>
+        <div id="tour-judges-criteria">
+          <CriteriaEditor
+            eventId={id}
+            criteria={criteria ?? []}
+            onChange={() => qc.invalidateQueries({ queryKey: ["criteria", id] })}
+          />
+        </div>
+        <div id="tour-judges-invite">
+          <JudgesSection
+            eventId={id}
+            categories={event?.categories ?? []}
+            assignments={assignments ?? []}
+            onChange={() => qc.invalidateQueries({ queryKey: ["judge-assignments", id] })}
+          />
+        </div>
       </main>
     </div>
   );

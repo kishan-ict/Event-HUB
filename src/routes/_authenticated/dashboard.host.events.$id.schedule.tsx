@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +55,28 @@ function ScheduleAdmin() {
     } else {
       setBlocks([]);
     }
-  }, [event]);
+    
+    if (event) {
+      const tourKey = `host-schedule-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-schedule-add', popover: { title: 'Add Milestones 📅', description: 'Click here to add important dates and deadlines (like Submission Deadline or Judging Period).', side: "bottom", align: 'start' } },
+              { element: '#tour-schedule-save', popover: { title: 'Save Schedule 💾', description: 'Once you have added all your milestones, click save to make them visible to participants.', side: "bottom", align: 'end' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   function addBlock() {
     setBlocks((prev) => [
@@ -135,7 +158,7 @@ function ScheduleAdmin() {
               Configure the schedule milestones and deadlines for participants to see.
             </p>
           </div>
-          <Button onClick={save} disabled={saving} className="bg-brand text-brand-foreground hover:bg-brand/90">
+          <Button id="tour-schedule-save" onClick={save} disabled={saving} className="bg-brand text-brand-foreground hover:bg-brand/90">
             {saving ? "Saving..." : "Save Changes"}
           </Button>
         </div>
@@ -149,7 +172,7 @@ function ScheduleAdmin() {
             <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground mb-4">
               Add timeline blocks to inform participants of important dates.
             </p>
-            <Button onClick={addBlock} variant="outline">
+            <Button id="tour-schedule-add" onClick={addBlock} variant="outline">
               <Plus className="mr-2 h-4 w-4" /> Add Milestone
             </Button>
           </div>
@@ -227,7 +250,7 @@ function ScheduleAdmin() {
                 </div>
               </Card>
             ))}
-            <Button onClick={addBlock} variant="outline" className="w-full border-dashed">
+            <Button id="tour-schedule-add-alt" onClick={addBlock} variant="outline" className="w-full border-dashed">
               <Plus className="mr-2 h-4 w-4" /> Add Another Milestone
             </Button>
           </div>

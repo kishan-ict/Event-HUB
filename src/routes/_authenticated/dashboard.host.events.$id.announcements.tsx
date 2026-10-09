@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +55,29 @@ function AnnouncementsAdmin() {
       return data ?? [];
     },
   });
+
+  useEffect(() => {
+    if (event) {
+      const tourKey = `host-announcements-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-announcements-create', popover: { title: 'Create Announcements 📢', description: 'Write a message to broadcast to all your participants and judges.', side: "bottom", align: 'start' } },
+              { element: '#tour-announcements-list', popover: { title: 'Manage Announcements 📰', description: 'Here you can see past announcements, pin important ones to the top, or delete them.', side: "top", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -120,7 +145,7 @@ function AnnouncementsAdmin() {
       </header>
       <main className="mx-auto max-w-3xl px-6 py-8">
         <Card className="p-6">
-          <form onSubmit={create} className="space-y-4">
+          <form id="tour-announcements-create" onSubmit={create} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="a-title">Title</Label>
               <Input
@@ -159,7 +184,7 @@ function AnnouncementsAdmin() {
         </Card>
 
         <h2 className="mt-8 mb-3 text-sm font-semibold">Published</h2>
-        <div className="space-y-3">
+        <div id="tour-announcements-list" className="space-y-3">
           {(items ?? []).length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 bg-surface/30 p-16 text-center mt-6">
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-border/60 bg-surface-elevated">

@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -61,6 +63,30 @@ function RegistrationsPage() {
     () => (event?.registration_fields as unknown as RegField[]) ?? [],
     [event],
   );
+  
+  useEffect(() => {
+    if (event) {
+      const tourKey = `host-registrations-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-reg-approval', popover: { title: 'Require Approval 🔒', description: 'Toggle this on if you want to manually review and approve each participant before they can join the event.', side: "bottom", align: 'start' } },
+              { element: '#tour-reg-filters', popover: { title: 'Filters & Search 🔍', description: 'Quickly find participants by their status (Pending, Approved) or by searching their name/email.', side: "bottom", align: 'start' } },
+              { element: '#tour-reg-table', popover: { title: 'Manage Participants 👥', description: 'Select users here to approve/reject them in bulk, or click individual rows for details.', side: "top", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   async function toggleApproval(next: boolean) {
     const { error } = await supabase
@@ -201,7 +227,7 @@ function RegistrationsPage() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">
-        <Card className="flex flex-wrap items-center justify-between gap-4 p-4">
+        <Card id="tour-reg-approval" className="flex flex-wrap items-center justify-between gap-4 p-4">
           <div>
             <div className="text-sm font-semibold">Require approval</div>
             <p className="text-xs text-muted-foreground">
@@ -214,7 +240,7 @@ function RegistrationsPage() {
           />
         </Card>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div id="tour-reg-filters" className="flex flex-wrap items-center gap-2">
           {(["all", "pending", "approved", "confirmed", "rejected"] as const).map((k) => (
             <button
               key={k}

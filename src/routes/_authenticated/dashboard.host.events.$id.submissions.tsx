@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
@@ -42,6 +45,28 @@ function SubmissionsPage() {
   });
 
   const subs = submissions ?? [];
+  
+  useEffect(() => {
+    if (event) {
+      const tourKey = `host-submissions-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-submissions-main', popover: { title: 'Project Submissions 🚀', description: 'When participants submit their projects or work, they will appear in this list for you to view.', side: "bottom", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,7 +85,7 @@ function SubmissionsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <main id="tour-submissions-main" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Submissions</h1>

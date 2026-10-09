@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import { supabase, SUPABASE_URL, SUPABASE_KEY } from "@/integrations/supabase/client";
 import { createClient } from "@supabase/supabase-js";
 import { PageHeader, EmptyState } from "@/components/dashboard-shell";
@@ -40,6 +42,29 @@ function AttendersPage() {
       return data ?? [];
     },
   });
+
+  useEffect(() => {
+    if (id) {
+      const tourKey = `host-attenders-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-attenders-create', popover: { title: 'Create Attenders 🎟️', description: 'Create credentials for your staff or volunteers so they can log in and scan QR codes.', side: "bottom", align: 'start' } },
+              { element: '#tour-attenders-list', popover: { title: 'Manage Access 📋', description: 'See all the volunteers you have added and remove them if they no longer need access.', side: "top", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [id]);
 
   async function createAttender(e: React.FormEvent) {
     e.preventDefault();
@@ -113,7 +138,7 @@ function AttendersPage() {
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Create Attender Credential</h3>
           
-          <form onSubmit={createAttender} className="flex flex-col sm:flex-row gap-4 items-end">
+          <form id="tour-attenders-create" onSubmit={createAttender} className="flex flex-col sm:flex-row gap-4 items-end">
             <div className="space-y-2 flex-1">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -180,7 +205,7 @@ function AttendersPage() {
           )}
         </Card>
 
-        <Card className="p-0 overflow-hidden">
+        <Card id="tour-attenders-list" className="p-0 overflow-hidden">
           {isLoading ? (
             <div className="h-32 animate-pulse bg-surface m-6 rounded-xl" />
           ) : !attenders || attenders.length === 0 ? (

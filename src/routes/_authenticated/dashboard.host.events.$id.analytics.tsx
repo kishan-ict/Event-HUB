@@ -22,8 +22,10 @@ import { StatCard } from "@/components/dashboard-shell";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { exportSvgAsPng } from "@/lib/export-chart";
 import { ArrowLeft, Download, FileImage, FileSpreadsheet } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 export const Route = createFileRoute(
   "/_authenticated/dashboard/host/events/$id/analytics"
@@ -68,6 +70,29 @@ function AnalyticsPage() {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (event) {
+      const tourKey = `host-analytics-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-analytics-export', popover: { title: 'Export Data 📥', description: 'Download all your registrations and submissions data as CSV files.', side: "bottom", align: 'end' } },
+              { element: '#tour-analytics-coming-soon', popover: { title: 'Coming Soon 🚀', description: 'We are working on bringing you powerful charts and insights in a future update!', side: "top", align: 'start' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   const { data: registrations } = useQuery({
     queryKey: ["analytics-registrations", id],
@@ -209,7 +234,7 @@ function AnalyticsPage() {
             Analytics
           </div>
         </div>
-        <div className="ml-auto flex gap-2">
+        <div id="tour-analytics-export" className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportRegs}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> Registrations
           </Button>
@@ -218,7 +243,7 @@ function AnalyticsPage() {
           </Button>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-24">
+      <main id="tour-analytics-coming-soon" className="mx-auto max-w-5xl px-6 py-24">
         <div className="rounded-xl border border-dashed border-border/60 bg-surface/30 p-16 text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-border/60 bg-surface-elevated">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>

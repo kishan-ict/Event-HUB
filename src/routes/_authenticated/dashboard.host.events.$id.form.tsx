@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import {
   DndContext,
   closestCenter,
@@ -89,7 +91,30 @@ function FormBuilder() {
     if (event?.registration_fields) {
       setFields(event.registration_fields as unknown as RegField[]);
     }
-  }, [event]);
+    
+    if (event) {
+      const tourKey = `host-form-tour-seen-${id}`;
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          const driverObj = driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+              { element: '#tour-form-add', popover: { title: 'Add Fields 📝', description: 'Click Add to insert new questions into your registration form. You can drag and drop them to reorder!', side: "right", align: 'start' } },
+              { element: '#tour-form-props', popover: { title: 'Field Properties ⚙️', description: 'Click on a field on the left to edit its label, type (Text, Dropdown, Checkbox), and whether it is required.', side: "left", align: 'start' } },
+              { element: '#tour-form-preview', popover: { title: 'Live Preview 📱', description: 'See exactly what your participants will see when they register. Updates instantly!', side: "top", align: 'start' } },
+              { element: '#tour-form-save', popover: { title: 'Save Form 💾', description: 'Don\'t forget to save your changes before you leave!', side: "bottom", align: 'end' } },
+            ],
+            onDestroyStarted: () => {
+              localStorage.setItem(tourKey, 'true');
+              driverObj.destroy();
+            }
+          });
+          driverObj.drive();
+        }, 500);
+      }
+    }
+  }, [event, id]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -192,7 +217,7 @@ function FormBuilder() {
               {event.is_published ? "Open form" : "Preview form"}
             </a>
           )}
-          <Button onClick={save} disabled={saving || isPublished} className="flex-1 sm:flex-none w-full sm:w-auto bg-brand text-brand-foreground hover:bg-brand/90">
+          <Button id="tour-form-save" onClick={save} disabled={saving || isPublished} className="flex-1 sm:flex-none w-full sm:w-auto bg-brand text-brand-foreground hover:bg-brand/90">
             {saving ? "Saving…" : isPublished ? "Locked (Published)" : "Save Form"}
           </Button>
         </div>
@@ -212,7 +237,7 @@ function FormBuilder() {
 
       <div className="flex flex-col flex-1 gap-0 lg:grid lg:grid-cols-[280px_1fr_320px]">
         {/* Left: field list */}
-        <aside className="order-1 lg:order-none border-b lg:border-b-0 lg:border-r border-border/60 bg-surface/30 p-3">
+        <aside id="tour-form-add" className="order-1 lg:order-none border-b lg:border-b-0 lg:border-r border-border/60 bg-surface/30 p-3">
           <div className="mb-2 flex items-center justify-between">
             <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
               Fields
@@ -251,7 +276,7 @@ function FormBuilder() {
         </aside>
 
         {/* Center: live preview */}
-        <main className="order-3 lg:order-none min-h-[70vh] overflow-auto bg-surface/10 p-6">
+        <main id="tour-form-preview" className="order-3 lg:order-none min-h-[70vh] overflow-auto bg-surface/10 p-6">
           <div
             className="mx-auto rounded-xl border border-border/60 bg-background shadow-sm transition-all"
             style={{ maxWidth: VP_WIDTH[viewport] }}
@@ -277,7 +302,7 @@ function FormBuilder() {
         </main>
 
         {/* Right: property panel */}
-        <aside className="order-2 lg:order-none border-b lg:border-b-0 lg:border-l border-border/60 bg-surface/30 p-4">
+        <aside id="tour-form-props" className="order-2 lg:order-none border-b lg:border-b-0 lg:border-l border-border/60 bg-surface/30 p-4">
           {!selectedField ? (
             <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
               Select a field to edit its properties
