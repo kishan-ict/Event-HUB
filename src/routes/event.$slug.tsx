@@ -84,6 +84,30 @@ function EventPage() {
     return () => window.removeEventListener("message", handleMessage);
   }, [slug, navigate]);
 
+  useEffect(() => {
+    if (event) {
+      document.title = `${event.name} — EVENT-HUB`;
+      
+      // Dynamic OG Image
+      let ogImage = document.querySelector('meta[property="og:image"]');
+      if (!ogImage) {
+        ogImage = document.createElement('meta');
+        ogImage.setAttribute('property', 'og:image');
+        document.head.appendChild(ogImage);
+      }
+      ogImage.setAttribute('content', event.banner_url || 'https://event-aleropath.pages.dev/favicon.png');
+
+      // Dynamic Favicon
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = event.logo_url || '/favicon.png';
+    }
+  }, [event]);
+
   if (isLoading) {
     return <LoadingScreen message="LOADING EVENT" />;
   }
@@ -165,12 +189,14 @@ function EventPage() {
           )}
 
           <AnnouncementsSection eventId={event.id} themeColor={themeColor} />
-
-          <footer className="border-t border-border/60 px-6 py-8 text-center text-xs text-muted-foreground">
-            Powered by EVENT-HUB
-          </footer>
         </>
       )}
+
+      <footer className="border-t border-border/60 bg-background px-6 py-4 flex items-center justify-center gap-2 shrink-0 z-50">
+        <span className="text-xs text-muted-foreground">Hosted on</span>
+        <img src="/favicon.png" alt="EVENT-HUB Logo" className="h-4 w-4 object-contain" />
+        <span className="text-xs font-semibold text-foreground tracking-tight">EVENT-HUB</span>
+      </footer>
     </div>
   );
 }
