@@ -60,9 +60,23 @@ function ParticipantTeam() {
         .select("id, user_id, role, status, created_at")
         .eq("team_id", myTeamMember!.team_id);
       
-      // We don't have user profiles joined natively unless we use auth.users (which requires service role)
-      // For now, we will just show user_id or "YOU"
-      return data ?? [];
+      if (!data || data.length === 0) return [];
+      
+      const userIds = data.map(m => m.user_id);
+      const { data: regs } = await supabase
+        .from("registrations")
+        .select("user_id, data")
+        .eq("event_id", eventId)
+        .in("user_id", userIds);
+        
+      return data.map(m => {
+        const reg = regs?.find(r => r.user_id === m.user_id);
+        const regData = reg?.data as Record<string, string> | undefined;
+        // Try common field names for name and email
+        const name = regData?.name || regData?.full_name || regData?.first_name || `User ${m.user_id.substring(0, 6)}`;
+        const email = regData?.email || "";
+        return { ...m, name, email };
+      });
     },
   });
 
@@ -184,7 +198,10 @@ function ParticipantTeam() {
                     </div>
                     <div>
                       <div className="font-medium text-sm">
-                        {m.user_id === user?.id ? "You" : `User ${m.user_id.substring(0, 6)}`}
+                        {m.user_id === user?.id ? "You" : m.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {m.email}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         {m.role === "leader" && <Badge variant="secondary" className="text-[10px]">Leader</Badge>}
@@ -208,27 +225,25 @@ function ParticipantTeam() {
           </Card>
 
           {myTeamMember.role === "leader" && (
-            <Card className="p-6 h-fit bg-surface/50">
+            <Card className="p-6 h-fit bg-surface/50 border-brand/20">
               <h3 className="font-semibold flex items-center gap-2 mb-2">
-                <UserPlus className="h-4 w-4" /> Invite Member
+                <UserPlus className="h-4 w-4" /> Team Invite Code
               </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                Enter an email address to invite a new participant to your team.
+                Share this 6-character code with your teammates so they can join your team.
               </p>
-              <form onSubmit={inviteMember} className="space-y-3">
+              <div className="flex gap-2">
                 <Input 
-                  type="email" 
-                  placeholder="email@example.com" 
-                  value={inviteEmail} 
-                  onChange={e => setInviteEmail(e.target.value)} 
+                  value={myTeamMember.teams?.invite_code || "N/A"} 
+                  readOnly
+                  className="font-mono uppercase tracking-widest text-center font-bold text-lg"
                 />
-                <Button type="submit" disabled={inviting} className="w-full">
-                  {inviting ? "Sending..." : "Send Invite"}
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(myTeamMember.teams?.invite_code || "");
+                  toast.success("Code copied!");
+                }}>
+                  Copy
                 </Button>
-              </form>
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md flex gap-2 text-xs text-blue-500">
-                <ShieldAlert className="h-4 w-4 shrink-0" />
-                <p>Emails must be registered on the platform to receive the invite.</p>
               </div>
             </Card>
           )}

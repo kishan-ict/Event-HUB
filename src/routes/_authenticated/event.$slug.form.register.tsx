@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
+import { Sparkles, CheckCircle2, AlertCircle, Users, UserPlus, User } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/event/$slug/form/register")({
   head: () => ({ meta: [{ title: "Register — EVENT-HUB" }] }),
@@ -176,15 +176,11 @@ function RegisterPage() {
                 </div>
               )}
             </div>
+            </div>
           )}
-          <div className="mt-6 flex gap-2">
-            <Link to="/event/$slug" params={{ slug }} className="flex-1">
-              <Button variant="outline" className="w-full">Back to event</Button>
-            </Link>
-            <Link to="/dashboard/participant" className="flex-1">
-              <Button className="w-full">Dashboard</Button>
-            </Link>
-          </div>
+
+          <TeamOnboarding eventId={event.id} slug={slug} />
+
         </Card>
       </div>
     );
@@ -427,10 +423,151 @@ export function FieldRenderer({
           className={invalidCls}
         />
       )}
-      {showError && (
-        <p id={errId} className="flex items-center gap-1 text-xs text-destructive">
-          <AlertCircle className="h-3 w-3" /> {error}
-        </p>
+      )}
+    </div>
+  );
+}
+
+function TeamOnboarding({ eventId, slug }: { eventId: string, slug: string }) {
+  const [mode, setMode] = useState<"choose" | "create" | "join" | "solo">("choose");
+  const [teamName, setTeamName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCreate = async () => {
+    if (!teamName.trim()) return toast.error("Team name required");
+    setLoading(true);
+    try {
+      const { data: u } = await supabase.auth.getSession();
+      if (!u.session?.user) throw new Error("Not signed in");
+      
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      const { data: newTeam, error: teamErr } = await supabase
+        .from("teams")
+        .insert({ event_id: eventId, name: teamName, invite_code: code })
+        .select()
+        .single();
+      if (teamErr) throw teamErr;
+
+      const { error: memberErr } = await supabase
+        .from("team_members")
+        .insert({ team_id: newTeam.id, user_id: u.session.user.id, role: "leader", status: "accepted" });
+      if (memberErr) throw memberErr;
+
+      toast.success("Team created!");
+      navigate({ to: "/dashboard/participant/events/$eventId/team", params: { eventId } });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create team");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoin = async () => {
+    if (!inviteCode.trim()) return toast.error("Invite code required");
+    setLoading(true);
+    try {
+      const { data: u } = await supabase.auth.getSession();
+      if (!u.session?.user) throw new Error("Not signed in");
+
+      const { data: team, error: teamErr } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("invite_code", inviteCode.toUpperCase().trim())
+        .maybeSingle();
+        
+      if (teamErr) throw teamErr;
+      if (!team) throw new Error("Invalid invite code");
+
+      const { error: memberErr } = await supabase
+        .from("team_members")
+        .insert({ team_id: team.id, user_id: u.session.user.id, role: "member", status: "accepted" });
+      
+      if (memberErr) {
+        if (memberErr.code === '23505') throw new Error("You are already in this team");
+        throw memberErr;
+      }
+
+      toast.success("Joined team!");
+      navigate({ to: "/dashboard/participant/events/$eventId/team", params: { eventId } });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to join team");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (mode === "choose") {
+    return (
+      <div className="mt-8 space-y-4">
+        <h3 className="font-semibold text-center text-lg">How would you like to participate?</h3>
+        <div className="grid gap-3">
+          <Button variant="outline" className="h-auto p-4 justify-start gap-4" onClick={() => navigate({ to: "/dashboard/participant/events/$eventId/info", params: { eventId } })}>
+            <div className="h-10 w-10 shrink-0 bg-brand/10 text-brand rounded-full flex items-center justify-center">
+              <User className="h-5 w-5" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-sm">Participate Solo</div>
+              <div className="text-xs text-muted-foreground font-normal">Work on your own project.</div>
+            </div>
+          </Button>
+          <Button variant="outline" className="h-auto p-4 justify-start gap-4" onClick={() => setMode("create")}>
+            <div className="h-10 w-10 shrink-0 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
+              <Users className="h-5 w-5" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-sm">Create a Team</div>
+              <div className="text-xs text-muted-foreground font-normal">Start a new team and invite others.</div>
+            </div>
+          </Button>
+          <Button variant="outline" className="h-auto p-4 justify-start gap-4" onClick={() => setMode("join")}>
+            <div className="h-10 w-10 shrink-0 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center">
+              <UserPlus className="h-5 w-5" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-sm">Join a Team</div>
+              <div className="text-xs text-muted-foreground font-normal">Use an invite code to join an existing team.</div>
+            </div>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8 space-y-4">
+      <Button variant="ghost" size="sm" onClick={() => setMode("choose")} className="-ml-3 text-muted-foreground">
+        ← Back
+      </Button>
+      
+      {mode === "create" && (
+        <div className="space-y-4">
+          <h3 className="font-semibold text-lg">Create your Team</h3>
+          <p className="text-sm text-muted-foreground">You'll be able to invite your teammates using a 6-character code after creating the team.</p>
+          <div className="space-y-2">
+            <Label>Team Name</Label>
+            <Input placeholder="Awesome Hackers" value={teamName} onChange={e => setTeamName(e.target.value)} />
+          </div>
+          <Button className="w-full" disabled={loading} onClick={handleCreate}>
+            {loading ? "Creating..." : "Create Team"}
+          </Button>
+        </div>
+      )}
+
+      {mode === "join" && (
+        <div className="space-y-4">
+          <h3 className="font-semibold text-lg">Join a Team</h3>
+          <p className="text-sm text-muted-foreground">Ask your team leader for the 6-character invite code.</p>
+          <div className="space-y-2">
+            <Label>Invite Code</Label>
+            <Input placeholder="e.g. A1B2C3" value={inviteCode} onChange={e => setInviteCode(e.target.value)} className="uppercase" />
+          </div>
+          <Button className="w-full" disabled={loading} onClick={handleJoin}>
+            {loading ? "Joining..." : "Join Team"}
+          </Button>
+        </div>
       )}
     </div>
   );
