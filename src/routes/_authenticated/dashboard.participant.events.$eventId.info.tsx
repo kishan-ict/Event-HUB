@@ -86,8 +86,13 @@ function ParticipantEventInfo() {
 
       {registration?.check_in_code && (
         <Card className="p-6 md:col-span-3 flex flex-col md:flex-row items-center gap-8">
-          <div className="shrink-0 p-4 bg-white rounded-xl shadow-sm border">
-            <QRCode value={registration.check_in_code} size={150} />
+          <div className="shrink-0 p-4 bg-white rounded-xl shadow-sm border w-[182px] h-[182px] flex items-center justify-center">
+            <QRCode 
+              value={registration.check_in_code} 
+              size={150} 
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }} 
+              viewBox={`0 0 256 256`}
+            />
           </div>
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-xl font-bold">Your Event Pass</h3>
