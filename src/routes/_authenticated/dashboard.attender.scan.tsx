@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { useState, useEffect, useRef } from "react";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { toast } from "sonner";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/dashboard-shell";
@@ -10,6 +10,39 @@ import { Input } from "@/components/ui/input";
 import { processCheckInCode, updateAttendanceStatus } from "@/lib/attendance.functions";
 import { Camera, CheckCircle2, XCircle, AlertTriangle, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+function QRScanner({ onScan }: { onScan: (text: string) => void }) {
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+  useEffect(() => {
+    scannerRef.current = new Html5QrcodeScanner(
+      "reader",
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      false
+    );
+
+    scannerRef.current.render(
+      (text) => {
+        if (scannerRef.current) {
+          scannerRef.current.pause(true);
+        }
+        onScan(text);
+      },
+      (error) => {
+        // Ignored. html5-qrcode triggers this on every frame where no QR is found.
+      }
+    );
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error);
+        scannerRef.current = null;
+      }
+    };
+  }, [onScan]);
+
+  return <div id="reader" style={{ width: "100%", height: "100%", border: "none" }} />;
+}
 
 export const Route = createFileRoute("/_authenticated/dashboard/attender/scan")({
   head: () => ({ meta: [{ title: "Take Attendance — EVENT-HUB" }] }),
@@ -116,20 +149,8 @@ function ScanPage() {
 
             <div className="rounded-xl border border-border/60 overflow-hidden bg-black/5 aspect-square max-w-sm mx-auto flex flex-col relative">
               {showScanner ? (
-                <Scanner
-                  formats={['qr_code', 'code_128']}
-                  allowMultiple={true}
-                  scanDelay={2000}
-                  onScan={(detected) => {
-                    if (detected && detected.length > 0) {
-                      const val = detected[0].rawValue?.trim();
-                      if (val) {
-                        handleCode(val, true);
-                      }
-                    }
-                  }}
-                  onError={(e) => toast.error("Scanner error: " + e.message)}
-                  styles={{ container: { width: '100%', height: '100%' } }}
+                <QRScanner
+                  onScan={(text) => handleCode(text, true)}
                 />
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
