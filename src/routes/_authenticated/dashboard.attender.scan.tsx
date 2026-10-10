@@ -77,21 +77,34 @@ function ScanPage() {
     setLoading(true);
     setShowScanner(false);
     try {
-      let finalCode = code;
+      let finalCode = code.trim();
       
       if (isFromScanner) {
-        if (code.startsWith("eventhub://checkin/")) {
-          finalCode = code.replace("eventhub://checkin/", "");
+        if (finalCode.startsWith("eventhub://checkin/")) {
+          finalCode = finalCode.replace("eventhub://checkin/", "");
         } else {
           throw new Error("Invalid QR Code: Must use the internal Event-Hub QR Pass.");
         }
       }
 
       const res = await processCheckInCode(finalCode);
+      
       if (res.registration.checked_in_at) {
         toast.warning("Attendance already taken!");
+        setScannedResult(res);
+      } else if (isFromScanner) {
+        // Automatically mark as present
+        await updateAttendanceStatus(res.registration.id, "present");
+        toast.success("Marked as present");
+        qc.invalidateQueries({ queryKey: ["attendance-history"] });
+        
+        // Update the result locally to reflect the change immediately
+        res.registration.attendance_status = "present";
+        res.registration.checked_in_at = new Date().toISOString();
+        setScannedResult(res);
+      } else {
+        setScannedResult(res);
       }
-      setScannedResult(res);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Invalid code");
       setScannedResult(null);
@@ -104,7 +117,7 @@ function ScanPage() {
   async function onManualSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!manualCode.trim()) return;
-    handleCode(manualCode.trim(), false); // false = manual entry
+    handleCode(manualCode, false); // false = manual entry
   }
 
   async function markAttendance(status: "present" | "absent") {
