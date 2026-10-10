@@ -88,7 +88,7 @@ function ParticipantEventInfo() {
         <Card className="p-6 md:col-span-3 flex flex-col md:flex-row items-center gap-8">
           <div className="shrink-0 p-4 bg-white rounded-xl shadow-sm border w-[182px] h-[182px] flex items-center justify-center">
             <QRCode 
-              value={registration.check_in_code} 
+              value={`eventhub://checkin/${registration.check_in_code}`} 
               size={150} 
               style={{ height: "auto", maxWidth: "100%", width: "100%" }} 
               viewBox={`0 0 256 256`}

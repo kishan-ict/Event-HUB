@@ -39,12 +39,25 @@ function ScanPage() {
     }
   });
 
-  async function handleCode(code: string) {
+  async function handleCode(code: string, isFromScanner: boolean = false) {
     if (loading) return;
     setLoading(true);
     setShowScanner(false);
     try {
-      const res = await processCheckInCode(code);
+      let finalCode = code;
+      
+      if (isFromScanner) {
+        if (code.startsWith("eventhub://checkin/")) {
+          finalCode = code.replace("eventhub://checkin/", "");
+        } else {
+          throw new Error("Invalid QR Code: Must use the internal Event-Hub QR Pass.");
+        }
+      }
+
+      const res = await processCheckInCode(finalCode);
+      if (res.registration.checked_in_at) {
+        toast.warning("Attendance already taken!");
+      }
       setScannedResult(res);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Invalid code");
@@ -58,7 +71,7 @@ function ScanPage() {
   async function onManualSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!manualCode.trim()) return;
-    handleCode(manualCode.trim());
+    handleCode(manualCode.trim(), false); // false = manual entry
   }
 
   async function markAttendance(status: "present" | "absent") {
@@ -106,7 +119,7 @@ function ScanPage() {
                 <Scanner
                   onScan={(detected) => {
                     if (detected && detected.length > 0) {
-                      handleCode(detected[0].rawValue);
+                      handleCode(detected[0].rawValue, true); // true = from scanner
                     }
                   }}
                   onError={(e) => console.error(e)}
