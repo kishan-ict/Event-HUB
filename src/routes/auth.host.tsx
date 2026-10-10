@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { PasswordStrengthBar } from "@/components/ui/password-strength";
 
 export const Route = createFileRoute("/auth/host")({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/auth/host")({
 
 const schema = z.object({
   email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(128),
+  password: z.string().min(8).max(128),
 });
 
 function HostAuth() {
@@ -219,9 +220,10 @@ export function AuthForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={6}
-          placeholder="At least 6 characters"
+          minLength={mode === "signup" ? 8 : undefined}
+          placeholder={mode === "signup" ? "At least 8 characters" : "Password"}
         />
+        {mode === "signup" && <PasswordStrengthBar password={password} />}
       </div>
       <Button type="submit" className="w-full" disabled={loading || !!rateLimitError}>
         {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}

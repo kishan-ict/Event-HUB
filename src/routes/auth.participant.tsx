@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthShell } from "./auth.host";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { PasswordStrengthBar } from "@/components/ui/password-strength";
 
 const searchSchema = z.object({
   redirect: fallback(z.string(), "").default(""),
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/auth/participant")({
 
 const schema = z.object({
   email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(128),
+  password: z.string().min(8).max(128),
 });
 
 function ParticipantAuth() {
@@ -186,9 +187,10 @@ function ParticipantForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={6}
-          placeholder="At least 6 characters"
+          minLength={mode === "signup" ? 8 : undefined}
+          placeholder={mode === "signup" ? "At least 8 characters" : "Password"}
         />
+        {mode === "signup" && <PasswordStrengthBar password={password} />}
       </div>
       <Button type="submit" className="w-full" disabled={loading || !!rateLimitError}>
         {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
