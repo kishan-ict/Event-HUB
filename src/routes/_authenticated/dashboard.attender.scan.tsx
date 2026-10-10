@@ -117,13 +117,18 @@ function ScanPage() {
             <div className="rounded-xl border border-border/60 overflow-hidden bg-black/5 aspect-square max-w-sm mx-auto flex flex-col relative">
               {showScanner ? (
                 <Scanner
-                  formats={['qr_code']}
+                  formats={['qr_code', 'code_128']}
+                  allowMultiple={true}
+                  scanDelay={2000}
                   onScan={(detected) => {
                     if (detected && detected.length > 0) {
-                      handleCode(detected[0].rawValue, true); // true = from scanner
+                      const val = detected[0].rawValue?.trim();
+                      if (val) {
+                        handleCode(val, true);
+                      }
                     }
                   }}
-                  onError={(e) => console.error(e)}
+                  onError={(e) => toast.error("Scanner error: " + e.message)}
                   styles={{ container: { width: '100%', height: '100%' } }}
                 />
               ) : (
