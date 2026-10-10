@@ -176,11 +176,13 @@ function RegisterPage() {
                 </div>
               )}
             </div>
-            </div>
           )}
 
-          <TeamOnboarding eventId={event.id} slug={slug} />
-
+          {conf && (
+            <div className="mt-6">
+              <TeamOnboarding eventId={event.id} slug={slug} />
+            </div>
+          )}
         </Card>
       </div>
     );
@@ -422,7 +424,6 @@ export function FieldRenderer({
           aria-describedby={showError ? errId : undefined}
           className={invalidCls}
         />
-      )}
       )}
     </div>
   );
