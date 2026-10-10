@@ -60,8 +60,7 @@ const HOST_NAV: HostNav[] = [
 type SimpleNavItem = { to: string; label: string; icon: ComponentType<{ className?: string }> };
 
 const JUDGE_NAV: SimpleNavItem[] = [
-  { to: "/dashboard/judge", label: "Assigned", icon: Users },
-  { to: "/dashboard/judge", label: "Evaluations", icon: Trophy },
+  { to: "/dashboard/judge", label: "Assigned Events", icon: Users },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
