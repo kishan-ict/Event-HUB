@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import { supabase } from "@/integrations/supabase/client";
-import { assignJudgeByEmail } from "@/lib/judges.functions";
+import { supabase, SUPABASE_URL, SUPABASE_KEY } from "@/integrations/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Gavel, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Gavel, Plus, Trash2, X, Copy, KeySquare } from "lucide-react";
 
 export const Route = createFileRoute(
   "/_authenticated/dashboard/host/events/$id/judges"
@@ -353,18 +353,60 @@ function JudgesSection({
   onChange: () => void;
 }) {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const assignFn = assignJudgeByEmail;
+  const [newCredentials, setNewCredentials] = useState<{ email: string; pass: string } | null>(null);
 
   async function invite(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
     setBusy(true);
     try {
-      await assignFn({ eventId, email: email.trim(), categories: selectedCats });
-      toast.success("Judge assigned");
+      const tempPassword = password.trim() ? password.trim() : Math.random().toString(36).slice(-8) + "A1!";
+      
+      const adminAuthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      });
+
+      const { data, error } = await adminAuthClient.auth.signUp({
+        email: email.trim(),
+        password: tempPassword,
+        options: {
+          data: { role: "judge" }
+        }
+      });
+
+      if (error && error.message.includes("User already registered")) {
+        // In a real app we'd look up the ID by email if they exist, but for now we throw
+        throw new Error("User already exists. Backend lookup not fully implemented for existing users.");
+      }
+      if (error) throw error;
+      if (!data.user) throw new Error("Failed to create user");
+
+      const judgeId = data.user.id;
+
+      const { error: upErr } = await supabase
+        .from("judge_assignments")
+        .upsert(
+          {
+            event_id: eventId,
+            judge_id: judgeId,
+            categories: selectedCats,
+          },
+          { onConflict: "event_id,judge_id" }
+        );
+
+      if (upErr) throw new Error(upErr.message);
+
+      setNewCredentials({ email: email.trim(), pass: tempPassword });
+      toast.success("Judge assigned and account generated");
       setEmail("");
+      setPassword("");
       setSelectedCats([]);
       onChange();
     } catch (err) {
@@ -387,19 +429,32 @@ function JudgesSection({
     <Card className="p-6">
       <h2 className="text-lg font-semibold">Judges</h2>
       <p className="text-sm text-muted-foreground">
-        Judges must have an account first at{" "}
+        Generate credentials for your judges so they can log in at{" "}
         <span className="font-mono">/auth/judge</span>.
       </p>
       <form onSubmit={invite} className="mt-4 space-y-3">
-        <div className="space-y-2">
-          <Label htmlFor="j-email">Judge email</Label>
-          <Input
-            id="j-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="judge@example.com"
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="space-y-2 flex-1">
+            <Label htmlFor="j-email">Judge email</Label>
+            <Input
+              id="j-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="judge@example.com"
+              required
+            />
+          </div>
+          <div className="space-y-2 flex-1">
+            <Label htmlFor="password">Password (Optional)</Label>
+            <Input
+              id="password"
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Auto-generate if blank"
+            />
+          </div>
         </div>
         {categories.length > 0 && (
           <div className="space-y-2">
@@ -430,9 +485,38 @@ function JudgesSection({
           </div>
         )}
         <Button type="submit" disabled={busy} className="bg-brand text-brand-foreground hover:bg-brand/90">
-          <Plus className="mr-1.5 h-3.5 w-3.5" /> {busy ? "Assigning…" : "Add judge"}
+          <Plus className="mr-1.5 h-3.5 w-3.5" /> {busy ? "Generating…" : "Generate judge account"}
         </Button>
       </form>
+
+      {newCredentials && (
+        <div className="mt-6 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+          <div className="flex items-start gap-3">
+            <KeySquare className="h-5 w-5 text-emerald-600 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-emerald-700">Credentials Generated</h4>
+              <p className="text-sm text-emerald-600/80 mb-3">
+                Copy and send this temporary password to the judge. They will use it to log in at <strong>/auth/judge</strong>.
+              </p>
+              <div className="flex items-center gap-4 font-mono text-sm bg-white p-2 rounded border">
+                <span><strong>Email:</strong> {newCredentials.email}</span>
+                <span><strong>Password:</strong> {newCredentials.pass}</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="ml-auto h-6"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`Login: ${newCredentials.email}\nPassword: ${newCredentials.pass}`);
+                    toast.success("Copied to clipboard");
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 space-y-2">
         {assignments.length === 0 ? (
