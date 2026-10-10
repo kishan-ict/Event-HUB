@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -32,11 +34,125 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <Hero />
+      <ActiveEvents />
       <RoleGrid />
       <FeatureGrid />
       <CTA />
       <Footer />
     </div>
+  );
+}
+
+function ActiveEvents() {
+  const { data: events, isLoading } = useQuery({
+    queryKey: ["active-events"],
+    queryFn: async () => {
+      const { data: eventsData, error } = await supabase
+        .from("events")
+        .select("id, name, slug, start_date, end_date, thumbnail_url, is_published, categories, description")
+        .eq("is_published", true)
+        .order("start_date", { ascending: true });
+        
+      if (error) throw error;
+
+      const eventIds = (eventsData || []).map(e => e.id);
+      const counts: Record<string, number> = {};
+      
+      if (eventIds.length > 0) {
+         const { data: regs } = await supabase
+           .from("registrations")
+           .select("event_id");
+         
+         for (const reg of (regs || [])) {
+            counts[reg.event_id] = (counts[reg.event_id] || 0) + 1;
+         }
+      }
+
+      return (eventsData || []).map(e => ({
+        ...e,
+        participantCount: counts[e.id] || 0
+      }));
+    }
+  });
+
+  return (
+    <section id="events" className="border-t border-border/60 bg-surface/10">
+      <div className="mx-auto max-w-6xl px-6 py-20">
+        <div className="mb-10 max-w-2xl">
+          <p className="font-mono text-xs uppercase tracking-widest text-brand">
+            Happening Now
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+            Live Events
+          </h2>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex h-32 items-center justify-center">
+             <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+          </div>
+        ) : events && events.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+             {events.map(event => (
+                <Link to="/event/$slug" params={{ slug: event.slug }} key={event.id}>
+                  <Card className="group flex h-full flex-col overflow-hidden transition-colors hover:border-brand/50 bg-card">
+                    {event.thumbnail_url ? (
+                      <div className="aspect-[16/9] w-full overflow-hidden bg-surface-elevated">
+                        <img 
+                          src={event.thumbnail_url} 
+                          alt={event.name} 
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-[16/9] w-full bg-surface-elevated flex items-center justify-center border-b border-border/60">
+                        <Calendar className="h-10 w-10 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand">
+                           {new Date(event.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{event.participantCount} registered</span>
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-semibold leading-tight">{event.name}</h3>
+                      {event.description && (
+                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                          {event.description}
+                        </p>
+                      )}
+                      {event.categories && event.categories.length > 0 && (
+                        <div className="mt-auto pt-5 flex gap-1.5 flex-wrap">
+                          {event.categories.slice(0, 3).map((c: string) => (
+                            <span key={c} className="inline-flex items-center rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-inset ring-border/80">
+                              {c}
+                            </span>
+                          ))}
+                          {event.categories.length > 3 && (
+                            <span className="inline-flex items-center rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-inset ring-border/80">
+                              +{event.categories.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
+             ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-border/60 bg-surface/30 p-12 text-center">
+            <Calendar className="mx-auto h-10 w-10 text-muted-foreground/40" />
+            <h3 className="mt-4 text-base font-medium">No live events right now</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Check back later or host your own event.</p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
